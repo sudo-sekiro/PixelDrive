@@ -12,11 +12,6 @@ PixelDriveAudioProcessor::PixelDriveAudioProcessor()
                      #endif
                        )
 {
-    // Set initial plugin gain
-    auto& leftPreGain = leftChain.template get<ChainPositions::preGainIndex>();
-    auto& rightPreGain = rightChain.template get<ChainPositions::preGainIndex>();
-    leftPreGain.setGainDecibels (-30.0f);
-    rightPreGain.setGainDecibels (30.0f);
 }
 
 PixelDriveAudioProcessor::~PixelDriveAudioProcessor()
@@ -103,6 +98,15 @@ void PixelDriveAudioProcessor::prepareToPlay (double sampleRate, int samplesPerB
 
     leftChain.prepare(spec);
     rightChain.prepare(spec);
+
+    // Set initial plugin gain
+    auto& leftPreGain = leftChain.template get<ChainPositions::preGainIndex>();
+    auto& rightPreGain = rightChain.template get<ChainPositions::preGainIndex>();
+
+    auto chainSettings = getChainSettings(apvts);
+
+    leftPreGain.setGainDecibels (chainSettings.preGain);
+    rightPreGain.setGainDecibels (chainSettings.preGain);
 }
 
 void PixelDriveAudioProcessor::releaseResources()
@@ -170,6 +174,14 @@ void PixelDriveAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 
     leftChain.process(leftContext);
     rightChain.process(rightContext);
+
+    auto& leftPreGain = leftChain.template get<ChainPositions::preGainIndex>();
+    auto& rightPreGain = rightChain.template get<ChainPositions::preGainIndex>();
+
+    auto chainSettings = getChainSettings(apvts);
+
+    leftPreGain.setGainDecibels (chainSettings.preGain);
+    rightPreGain.setGainDecibels (chainSettings.preGain);
 }
 
 //==============================================================================
@@ -200,12 +212,21 @@ void PixelDriveAudioProcessor::setStateInformation (const void* data, int sizeIn
     juce::ignoreUnused (data, sizeInBytes);
 }
 
+ChainSettings getChainSettings(juce::AudioProcessorValueTreeState& apvts)
+{
+    ChainSettings settings;
+
+    settings.preGain = apvts.getRawParameterValue("preGain")->load();
+
+    return settings;
+}
+
 juce::AudioProcessorValueTreeState::ParameterLayout
     PixelDriveAudioProcessor::createParameterLayout()
     {
         juce::AudioProcessorValueTreeState::ParameterLayout layout;
 
-        layout.add(std::make_unique<juce::AudioParameterFloat>("Gain","Gain",
+        layout.add(std::make_unique<juce::AudioParameterFloat>("preGain","preGain",
                                     juce::NormalisableRange<float>(-24.f, 24.f, 0.5f, 1.f),
                                     0.0f));
         return layout;
