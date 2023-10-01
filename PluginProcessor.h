@@ -1,6 +1,7 @@
 #pragma once
 
 #include <juce_audio_processors/juce_audio_processors.h>
+#include <juce_dsp/juce_dsp.h>
 
 //==============================================================================
 class PixelDriveAudioProcessor  : public juce::AudioProcessor
@@ -51,4 +52,13 @@ public:
 private:
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PixelDriveAudioProcessor)
+
+    enum ChainPositions
+    {
+        preGainIndex
+    };
+
+    using MonoChain = juce::dsp::ProcessorChain<juce::dsp::Gain<float>>;
+
+    MonoChain leftChain, rightChain;
 };

@@ -12,6 +12,11 @@ PixelDriveAudioProcessor::PixelDriveAudioProcessor()
                      #endif
                        )
 {
+    // Set initial plugin gain
+    auto& leftPreGain = leftChain.template get<ChainPositions::preGainIndex>();
+    auto& rightPreGain = rightChain.template get<ChainPositions::preGainIndex>();
+    leftPreGain.setGainDecibels (-30.0f);
+    rightPreGain.setGainDecibels (30.0f);
 }
 
 PixelDriveAudioProcessor::~PixelDriveAudioProcessor()
@@ -88,7 +93,16 @@ void PixelDriveAudioProcessor::prepareToPlay (double sampleRate, int samplesPerB
 {
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
-    juce::ignoreUnused (sampleRate, samplesPerBlock);
+
+    juce::dsp::ProcessSpec spec;
+
+    spec.maximumBlockSize = samplesPerBlock;
+    spec.numChannels = 1;
+
+    spec.sampleRate = sampleRate;
+
+    leftChain.prepare(spec);
+    rightChain.prepare(spec);
 }
 
 void PixelDriveAudioProcessor::releaseResources()
@@ -145,12 +159,17 @@ void PixelDriveAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     // the samples and the outer loop is handling the channels.
     // Alternatively, you can process the samples with the channels
     // interleaved by keeping the same state.
-    for (int channel = 0; channel < totalNumInputChannels; ++channel)
-    {
-        auto* channelData = buffer.getWritePointer (channel);
-        juce::ignoreUnused (channelData);
-        // ..do something to the data...
-    }
+
+    juce::dsp::AudioBlock<float> block(buffer);
+
+    auto LeftBlock = block.getSingleChannelBlock(0);
+    auto RightBlock = block.getSingleChannelBlock(1);
+
+    juce::dsp::ProcessContextReplacing<float> leftContext(LeftBlock);
+    juce::dsp::ProcessContextReplacing<float> rightContext(RightBlock);
+
+    leftChain.process(leftContext);
+    rightChain.process(rightContext);
 }
 
 //==============================================================================
