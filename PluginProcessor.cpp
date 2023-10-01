@@ -161,7 +161,8 @@ bool PixelDriveAudioProcessor::hasEditor() const
 
 juce::AudioProcessorEditor* PixelDriveAudioProcessor::createEditor()
 {
-    return new PixelDriveAudioProcessorEditor (*this);
+    // return new PixelDriveAudioProcessorEditor (*this);
+    return new juce::GenericAudioProcessorEditor (*this);
 }
 
 //==============================================================================
@@ -179,6 +180,17 @@ void PixelDriveAudioProcessor::setStateInformation (const void* data, int sizeIn
     // whose contents will have been created by the getStateInformation() call.
     juce::ignoreUnused (data, sizeInBytes);
 }
+
+juce::AudioProcessorValueTreeState::ParameterLayout
+    PixelDriveAudioProcessor::createParameterLayout()
+    {
+        juce::AudioProcessorValueTreeState::ParameterLayout layout;
+
+        layout.add(std::make_unique<juce::AudioParameterFloat>("Gain","Gain",
+                                    juce::NormalisableRange<float>(-24.f, 24.f, 0.5f, 1.f),
+                                    0.0f));
+        return layout;
+    }
 
 //==============================================================================
 // This creates new instances of the plugin..
