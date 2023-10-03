@@ -122,10 +122,15 @@ private:
 
     enum ChainPositions
     {
-        preGainIndex
+        preGainIndex,
+        distortionIndex,
+        lowPassIndex
     };
 
-    using MonoChain = juce::dsp::ProcessorChain<juce::dsp::Gain<float>, Distortion<float>>;
+    using Filter = juce::dsp::IIR::Filter<float>;
+    using FilterCoefs = juce::dsp::IIR::Coefficients<float>;
+
+    using MonoChain = juce::dsp::ProcessorChain<juce::dsp::Gain<float>, Distortion<float>, juce::dsp::ProcessorDuplicator<Filter, FilterCoefs>>;
 
     MonoChain leftChain, rightChain;
 };

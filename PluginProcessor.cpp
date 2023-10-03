@@ -96,6 +96,12 @@ void PixelDriveAudioProcessor::prepareToPlay (double sampleRate, int samplesPerB
 
     spec.sampleRate = sampleRate;
 
+    auto& leftHighPass = leftChain.get<ChainPositions::lowPassIndex>();
+    leftHighPass.state = FilterCoefs::makeFirstOrderLowPass (spec.sampleRate, 10000.0f);
+
+    auto& rightHighPass = rightChain.get<ChainPositions::lowPassIndex>();
+    rightHighPass.state = FilterCoefs::makeFirstOrderLowPass (spec.sampleRate, 10000.0f);
+
     leftChain.prepare(spec);
     rightChain.prepare(spec);
 
