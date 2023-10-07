@@ -3,12 +3,69 @@
 #include <juce_audio_processors/juce_audio_processors.h>
 #include <juce_dsp/juce_dsp.h>
 
+#include <assert.h>
+
 struct ChainSettings
 {
     float preGain {0.f};
 };
 
 ChainSettings getChainSettings(juce::AudioProcessorValueTreeState& apvts);
+
+//==============================================================================
+template <typename Type>
+class CabSimulator
+{
+public:
+    //==============================================================================
+    CabSimulator()
+    {
+        auto dir = juce::File::getCurrentWorkingDirectory();
+
+        int numTries = 0;
+
+        while (! dir.getChildFile ("Resources").exists() && numTries++ < 15)
+            dir = dir.getParentDirectory();
+
+        auto& convolution = processorChain.template get<convolutionIndex>();
+
+        auto impulseFile = dir.getChildFile ("Resources").getChildFile ("guitar_amp.wav");
+        assert(impulseFile.existsAsFile());
+
+        convolution.loadImpulseResponse (impulseFile,
+                                         juce::dsp::Convolution::Stereo::yes,
+                                         juce::dsp::Convolution::Trim::no,
+                                         1024);
+    }
+
+    //==============================================================================
+    void prepare (const juce::dsp::ProcessSpec& spec)
+    {
+        processorChain.prepare(spec);
+    }
+
+    //==============================================================================
+    template <typename ProcessContext>
+    void process (const ProcessContext& context) noexcept
+    {
+        processorChain.process(context);
+    }
+
+    //==============================================================================
+    void reset() noexcept
+    {
+        processorChain.reset();
+    }
+
+private:
+    //==============================================================================
+    enum
+    {
+        convolutionIndex
+    };
+
+    juce::dsp::ProcessorChain<juce::dsp::Convolution> processorChain;
+};
 
 //==============================================================================
 template <typename Type>
@@ -124,13 +181,14 @@ private:
     {
         preGainIndex,
         distortionIndex,
-        lowPassIndex
+        lowPassIndex,
+        cabSimIndex
     };
 
     using Filter = juce::dsp::IIR::Filter<float>;
     using FilterCoefs = juce::dsp::IIR::Coefficients<float>;
 
-    using MonoChain = juce::dsp::ProcessorChain<juce::dsp::Gain<float>, Distortion<float>, juce::dsp::ProcessorDuplicator<Filter, FilterCoefs>>;
+    using MonoChain = juce::dsp::ProcessorChain<juce::dsp::Gain<float>, Distortion<float>, juce::dsp::ProcessorDuplicator<Filter, FilterCoefs>, CabSimulator<float>>;
 
     MonoChain leftChain, rightChain;
 };
