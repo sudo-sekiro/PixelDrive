@@ -188,6 +188,12 @@ void PixelDriveAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 
     leftPreGain.setGainDecibels (chainSettings.preGain);
     rightPreGain.setGainDecibels (chainSettings.preGain);
+
+    auto& leftDistortion = leftChain.template get<ChainPositions::distortionIndex>();
+    auto& rightDistortion = rightChain.template get<ChainPositions::distortionIndex>();
+
+    leftDistortion.setParams(chainSettings, getSampleRate());
+    rightDistortion.setParams(chainSettings, getSampleRate());
 }
 
 //==============================================================================
@@ -224,6 +230,12 @@ ChainSettings getChainSettings(juce::AudioProcessorValueTreeState& apvts)
 
     settings.preGain = apvts.getRawParameterValue("preGain")->load();
 
+    // Return distortion parameters
+    settings.distortionPreGain = apvts.getRawParameterValue("distortionPreGain")->load();
+    settings.distortionTone = apvts.getRawParameterValue("distortionTone")->load();
+    settings.distortionPostGain = apvts.getRawParameterValue("distortionPostGain")->load();
+    settings.distortionClarity = apvts.getRawParameterValue("distortionClarity")->load();
+
     return settings;
 }
 
@@ -235,6 +247,26 @@ juce::AudioProcessorValueTreeState::ParameterLayout
         layout.add(std::make_unique<juce::AudioParameterFloat>("preGain","preGain",
                                     juce::NormalisableRange<float>(-24.f, 24.f, 0.5f, 1.f),
                                     0.0f));
+        /* Distortion parameters
+         * distortionPreGain: Input gain to the distortion class
+         * distortionTone: Controls the harshness of the waveshaper equation, tanh ( tone * x)
+         * distortionPostGain: Output gain of the distortion class
+         * distortionClarity: highpass filter cut off frequency to control low harmonics
+         */
+        layout.add(std::make_unique<juce::AudioParameterFloat>("distortionPreGain","distortionPreGain",
+                                    juce::NormalisableRange<float>(-10.f, 100.f, 0.5f, 1.f),
+                                    0.0f));
+        layout.add(std::make_unique<juce::AudioParameterFloat>("distortionTone","distortionTone",
+                                    juce::NormalisableRange<float>(0.01f, 100.f, 0.5f, 1.f),
+                                    0.0f));
+        layout.add(std::make_unique<juce::AudioParameterFloat>("distortionPostGain","distortionPostGain",
+                                    juce::NormalisableRange<float>(-24.f, 24.f, 0.5f, 1.f),
+                                    0.0f));
+        layout.add(std::make_unique<juce::AudioParameterFloat>("distortionClarity","distortionClarity",
+                                    juce::NormalisableRange<float>(0.f, 5000.f, 0.5f, 1.f),
+                                    0.0f));
+
+
         return layout;
     }
 

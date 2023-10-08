@@ -5,9 +5,11 @@
 
 #include <assert.h>
 
+// Add parameters
 struct ChainSettings
 {
     float preGain {0.f};
+    float distortionTone {1.f}, distortionPreGain {50.f}, distortionPostGain {0.f}, distortionClarity {1000.f};
 };
 
 ChainSettings getChainSettings(juce::AudioProcessorValueTreeState& apvts);
@@ -111,6 +113,27 @@ public:
         processorChain.reset();
     }
 
+    //==============================================================================
+    void setParams(ChainSettings chainSettings, double sampleRate)
+    {
+        // Set how hard the wave shaper clipping is. High tone values approach a squarewave
+        auto& waveshaper = processorChain.template get<waveshaperIndex>();
+        auto tone = chainSettings.distortionTone;
+        waveshaper.functionToUse = [=] (Type x)
+                                   {
+                                       return std::tanh(tone * x);
+                                   };
+
+        auto& preGain = processorChain.template get<preGainIndex>();
+        preGain.setGainDecibels (chainSettings.distortionPreGain);
+
+        auto& postGain = processorChain.template get<postGainIndex>();
+        postGain.setGainDecibels (chainSettings.distortionPostGain);
+
+        auto& filter = processorChain.template get<filterIndex>();
+        filter.state = FilterCoefs::makeFirstOrderHighPass (sampleRate, chainSettings.distortionClarity);
+    }
+
 private:
     //==============================================================================
     enum
@@ -124,7 +147,7 @@ private:
     using Filter = juce::dsp::IIR::Filter<Type>;
     using FilterCoefs = juce::dsp::IIR::Coefficients<Type>;
 
-    juce::dsp::ProcessorChain<juce::dsp::ProcessorDuplicator<Filter, FilterCoefs>, juce::dsp::Gain<Type>, juce::dsp::WaveShaper<Type>, juce::dsp::Gain<Type>> processorChain; // [1]
+    juce::dsp::ProcessorChain<juce::dsp::ProcessorDuplicator<Filter, FilterCoefs>, juce::dsp::Gain<Type>, juce::dsp::WaveShaper<Type, std::function<Type(Type)>>, juce::dsp::Gain<Type>> processorChain; // [1]
 };
 
 //==============================================================================
