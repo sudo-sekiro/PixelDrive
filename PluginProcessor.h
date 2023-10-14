@@ -10,10 +10,65 @@ struct ChainSettings
 {
     float preGain {0.f};
     float distortionTone {1.f}, distortionPreGain {50.f}, distortionPostGain {0.f}, distortionClarity {1000.f};
+    float reverbIntensity {0.5f}, reverbWetMix {0.33f}, reverbRoomSize {0.5f}, reverbSpread {1.f};
+    bool reverbShimmer {false};
     float noiseGate {0.f};
 };
 
 ChainSettings getChainSettings(juce::AudioProcessorValueTreeState& apvts);
+
+
+//==============================================================================
+template <typename Type>
+class Reverb
+{
+public:
+    //==============================================================================
+    Reverb()
+    {}
+
+    //==============================================================================
+    void prepare (const juce::dsp::ProcessSpec& spec)
+    {
+        reverb.prepare (spec);
+    }
+
+    //==============================================================================
+    template <typename ProcessContext>
+    void process (const ProcessContext& context) noexcept
+    {
+        reverb.process (context);
+    }
+
+    //==============================================================================
+    void reset() noexcept
+    {
+        reverb.reset ();
+    }
+
+    //==============================================================================
+    void setParams(ChainSettings chainSettings)
+    {
+        // Set reverb parameters
+        //auto tone = chainSettings.distortionTone;
+
+        juce::Reverb::Parameters newParams;
+
+        newParams.damping = 1.f - chainSettings.reverbIntensity;
+        newParams.dryLevel = 1.f - chainSettings.reverbWetMix;
+        newParams.wetLevel = chainSettings.reverbWetMix;
+        newParams.roomSize = chainSettings.reverbRoomSize;
+        newParams.width = chainSettings.reverbSpread;
+
+        newParams.freezeMode = chainSettings.reverbShimmer ?  1.f : 0.f;
+
+        reverb.setParameters (newParams);
+    }
+
+private:
+    //==============================================================================
+    juce::dsp::Reverb reverb;
+};
 
 //==============================================================================
 template <typename Type>
@@ -206,13 +261,14 @@ private:
         preGainIndex,
         distortionIndex,
         cabSimIndex,
+        reverbIndex,
         noiseGateIndex
     };
 
     using Filter = juce::dsp::IIR::Filter<float>;
     using FilterCoefs = juce::dsp::IIR::Coefficients<float>;
 
-    using MonoChain = juce::dsp::ProcessorChain<juce::dsp::Gain<float>, Distortion<float>, CabSimulator<float>, juce::dsp::ProcessorDuplicator<Filter, FilterCoefs>>;
+    using MonoChain = juce::dsp::ProcessorChain<juce::dsp::Gain<float>, Distortion<float>, CabSimulator<float>, Reverb<float>,juce::dsp::ProcessorDuplicator<Filter, FilterCoefs>>;
 
     MonoChain leftChain, rightChain;
 };

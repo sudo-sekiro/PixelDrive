@@ -195,6 +195,12 @@ void PixelDriveAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     leftDistortion.setParams(chainSettings, getSampleRate());
     rightDistortion.setParams(chainSettings, getSampleRate());
 
+    auto& leftReverb = leftChain.template get<ChainPositions::reverbIndex>();
+    auto& rightReverb = rightChain.template get<ChainPositions::reverbIndex>();
+
+    leftReverb.setParams(chainSettings);
+    rightReverb.setParams(chainSettings);
+
     auto& leftNoiseGate = leftChain.template get<ChainPositions::noiseGateIndex>();
     auto& rightNoiseGate = rightChain.template get<ChainPositions::noiseGateIndex>();
 
@@ -243,6 +249,13 @@ ChainSettings getChainSettings(juce::AudioProcessorValueTreeState& apvts)
     settings.distortionPostGain = apvts.getRawParameterValue("distortionPostGain")->load();
     settings.distortionClarity = apvts.getRawParameterValue("distortionClarity")->load();
 
+    // Return reverb parameters
+    settings.reverbIntensity = apvts.getRawParameterValue("reverbIntensity")->load();
+    settings.reverbShimmer = apvts.getRawParameterValue("reverbShimmer")->load();
+    settings.reverbRoomSize = apvts.getRawParameterValue("reverbRoomSize")->load();
+    settings.reverbWetMix = apvts.getRawParameterValue("reverbWetMix")->load();
+    settings.reverbSpread = apvts.getRawParameterValue("reverbSpread")->load();
+
     settings.noiseGate = apvts.getRawParameterValue("noiseGate")->load();
 
     return settings;
@@ -275,6 +288,27 @@ juce::AudioProcessorValueTreeState::ParameterLayout
         layout.add(std::make_unique<juce::AudioParameterFloat>("distortionClarity","distortionClarity",
                                     juce::NormalisableRange<float>(0.f, 5000.f, 0.5f, 1.f),
                                     1000.0f));
+
+        /* Reverb parameters
+         * reverbIntensity: Dampening of the reverb. 0 is fully dampened.
+         * reverbRoomSize: Sets reverb room size.
+         * reverbWetMix: Changes the ratio of wet and dry. 1 is all wet 0 is all dry.
+         * reverbSpread: Sets the spread. 1 is high.
+         * reverbShimmer: Enable feedback mode.
+         */
+        layout.add(std::make_unique<juce::AudioParameterFloat>("reverbIntensity","reverbIntensity",
+                                    juce::NormalisableRange<float>(0.f, 1.f, 0.1f, 1.f),
+                                    0.5f));
+        layout.add(std::make_unique<juce::AudioParameterFloat>("reverbRoomSize","reverbRoomSize",
+                                    juce::NormalisableRange<float>(0.f, 1.f, 0.1f, 1.f),
+                                    0.5f));
+        layout.add(std::make_unique<juce::AudioParameterFloat>("reverbWetMix","reverbWetMix",
+                                    juce::NormalisableRange<float>(0.f, 1.f, 0.1f, 1.f),
+                                    0.33f));
+        layout.add(std::make_unique<juce::AudioParameterFloat>("reverbSpread","reverbSpread",
+                                    juce::NormalisableRange<float>(0.f, 1.f, 0.1f, 1.f),
+                                    1.f));
+        layout.add(std::make_unique<juce::AudioParameterBool>("reverbShimmer", "reverbShimmer", false));
 
         layout.add(std::make_unique<juce::AudioParameterFloat>("noiseGate","noiseGate",
                                     juce::NormalisableRange<float>(10000.f, 20000.f, 0.5f, 1.f),
