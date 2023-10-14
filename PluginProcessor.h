@@ -10,6 +10,7 @@ struct ChainSettings
 {
     float preGain {0.f};
     float distortionTone {1.f}, distortionPreGain {50.f}, distortionPostGain {0.f}, distortionClarity {1000.f};
+    float noiseGate {0.f};
 };
 
 ChainSettings getChainSettings(juce::AudioProcessorValueTreeState& apvts);
@@ -204,14 +205,14 @@ private:
     {
         preGainIndex,
         distortionIndex,
-        lowPassIndex,
-        cabSimIndex
+        cabSimIndex,
+        noiseGateIndex
     };
 
     using Filter = juce::dsp::IIR::Filter<float>;
     using FilterCoefs = juce::dsp::IIR::Coefficients<float>;
 
-    using MonoChain = juce::dsp::ProcessorChain<juce::dsp::Gain<float>, Distortion<float>, juce::dsp::ProcessorDuplicator<Filter, FilterCoefs>, CabSimulator<float>>;
+    using MonoChain = juce::dsp::ProcessorChain<juce::dsp::Gain<float>, Distortion<float>, CabSimulator<float>, juce::dsp::ProcessorDuplicator<Filter, FilterCoefs>>;
 
     MonoChain leftChain, rightChain;
 };

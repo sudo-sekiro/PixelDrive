@@ -96,11 +96,11 @@ void PixelDriveAudioProcessor::prepareToPlay (double sampleRate, int samplesPerB
 
     spec.sampleRate = sampleRate;
 
-    auto& leftHighPass = leftChain.get<ChainPositions::lowPassIndex>();
-    leftHighPass.state = FilterCoefs::makeFirstOrderLowPass (spec.sampleRate, 10000.0f);
+    auto& leftnoiseGate = leftChain.get<ChainPositions::noiseGateIndex>();
+    leftnoiseGate.state = FilterCoefs::makeFirstOrderLowPass (spec.sampleRate, 10000.0f);
 
-    auto& rightHighPass = rightChain.get<ChainPositions::lowPassIndex>();
-    rightHighPass.state = FilterCoefs::makeFirstOrderLowPass (spec.sampleRate, 10000.0f);
+    auto& rightNoiseGate = rightChain.get<ChainPositions::noiseGateIndex>();
+    rightNoiseGate.state = FilterCoefs::makeFirstOrderLowPass (spec.sampleRate, 10000.0f);
 
     leftChain.prepare(spec);
     rightChain.prepare(spec);
@@ -194,6 +194,12 @@ void PixelDriveAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 
     leftDistortion.setParams(chainSettings, getSampleRate());
     rightDistortion.setParams(chainSettings, getSampleRate());
+
+    auto& leftNoiseGate = leftChain.template get<ChainPositions::noiseGateIndex>();
+    auto& rightNoiseGate = rightChain.template get<ChainPositions::noiseGateIndex>();
+
+    leftNoiseGate.state = FilterCoefs::makeFirstOrderLowPass (getSampleRate(), chainSettings.noiseGate);
+    rightNoiseGate.state = FilterCoefs::makeFirstOrderLowPass (getSampleRate(), chainSettings.noiseGate);
 }
 
 //==============================================================================
@@ -224,6 +230,7 @@ void PixelDriveAudioProcessor::setStateInformation (const void* data, int sizeIn
     juce::ignoreUnused (data, sizeInBytes);
 }
 
+// Add parameter
 ChainSettings getChainSettings(juce::AudioProcessorValueTreeState& apvts)
 {
     ChainSettings settings;
@@ -236,9 +243,12 @@ ChainSettings getChainSettings(juce::AudioProcessorValueTreeState& apvts)
     settings.distortionPostGain = apvts.getRawParameterValue("distortionPostGain")->load();
     settings.distortionClarity = apvts.getRawParameterValue("distortionClarity")->load();
 
+    settings.noiseGate = apvts.getRawParameterValue("noiseGate")->load();
+
     return settings;
 }
 
+// Add parameters
 juce::AudioProcessorValueTreeState::ParameterLayout
     PixelDriveAudioProcessor::createParameterLayout()
     {
@@ -255,16 +265,20 @@ juce::AudioProcessorValueTreeState::ParameterLayout
          */
         layout.add(std::make_unique<juce::AudioParameterFloat>("distortionPreGain","distortionPreGain",
                                     juce::NormalisableRange<float>(-10.f, 100.f, 0.5f, 1.f),
-                                    0.0f));
+                                    50.0f));
         layout.add(std::make_unique<juce::AudioParameterFloat>("distortionTone","distortionTone",
                                     juce::NormalisableRange<float>(0.01f, 100.f, 0.5f, 1.f),
-                                    0.0f));
+                                    5.0f));
         layout.add(std::make_unique<juce::AudioParameterFloat>("distortionPostGain","distortionPostGain",
                                     juce::NormalisableRange<float>(-24.f, 24.f, 0.5f, 1.f),
                                     0.0f));
         layout.add(std::make_unique<juce::AudioParameterFloat>("distortionClarity","distortionClarity",
                                     juce::NormalisableRange<float>(0.f, 5000.f, 0.5f, 1.f),
-                                    0.0f));
+                                    1000.0f));
+
+        layout.add(std::make_unique<juce::AudioParameterFloat>("noiseGate","noiseGate",
+                                    juce::NormalisableRange<float>(10000.f, 20000.f, 0.5f, 1.f),
+                                    17500.0f));
 
 
         return layout;
