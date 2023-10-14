@@ -4,6 +4,9 @@
 #include <juce_dsp/juce_dsp.h>
 
 #include <assert.h>
+#include <iostream>
+#include <fstream>
+#include <cstring>
 
 // Add parameters
 struct ChainSettings
@@ -85,44 +88,39 @@ public:
         while (! dir.getChildFile ("Resources").exists() && numTries++ < 15)
             dir = dir.getParentDirectory();
 
-        auto& convolution = processorChain.template get<convolutionIndex>();
-
-        auto impulseFile = dir.getChildFile ("Resources").getChildFile ("guitar_amp.wav");
+        auto impulseFile = dir.getChildFile ("Resources").getChildFile ("thrash_amp.wav");// ("guitar_amp.wav");
         assert(impulseFile.existsAsFile());
 
         convolution.loadImpulseResponse (impulseFile,
-                                         juce::dsp::Convolution::Stereo::yes,
+                                         juce::dsp::Convolution::Stereo::no,
                                          juce::dsp::Convolution::Trim::no,
-                                         1024);
+                                         1024,
+                                         juce::dsp::Convolution::Normalise::yes);
     }
 
     //==============================================================================
     void prepare (const juce::dsp::ProcessSpec& spec)
     {
-        processorChain.prepare(spec);
+        convolution.prepare(spec);
     }
 
     //==============================================================================
     template <typename ProcessContext>
     void process (const ProcessContext& context) noexcept
     {
-        processorChain.process(context);
+        convolution.process(context);
     }
 
     //==============================================================================
     void reset() noexcept
     {
-        processorChain.reset();
+        convolution.reset();
     }
 
 private:
     //==============================================================================
-    enum
-    {
-        convolutionIndex
-    };
 
-    juce::dsp::ProcessorChain<juce::dsp::Convolution> processorChain;
+    juce::dsp::Convolution convolution{juce::dsp::Convolution::Latency{ 10 }};
 };
 
 //==============================================================================
