@@ -195,6 +195,12 @@ void PixelDriveAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     leftDistortion.setParams(chainSettings, getSampleRate());
     rightDistortion.setParams(chainSettings, getSampleRate());
 
+    auto& leftDelay = leftChain.template get<ChainPositions::delayIndex>();
+    auto& rightDelay = rightChain.template get<ChainPositions::delayIndex>();
+
+    leftDelay.setParameters(chainSettings, 0);
+    rightDelay.setParameters(chainSettings, 0);
+
     auto& leftReverb = leftChain.template get<ChainPositions::reverbIndex>();
     auto& rightReverb = rightChain.template get<ChainPositions::reverbIndex>();
 
@@ -249,6 +255,11 @@ ChainSettings getChainSettings(juce::AudioProcessorValueTreeState& apvts)
     settings.distortionPostGain = apvts.getRawParameterValue("distortionPostGain")->load();
     settings.distortionClarity = apvts.getRawParameterValue("distortionClarity")->load();
 
+    // Return delay parameters
+    settings.delayTime = apvts.getRawParameterValue("delayTime")->load();
+    settings.delayWetLevel = apvts.getRawParameterValue("delayWetLevel")->load();
+    settings.delayFeedback = apvts.getRawParameterValue("delayFeedback")->load();
+
     // Return reverb parameters
     settings.reverbIntensity = apvts.getRawParameterValue("reverbIntensity")->load();
     settings.reverbShimmer = apvts.getRawParameterValue("reverbShimmer")->load();
@@ -288,6 +299,21 @@ juce::AudioProcessorValueTreeState::ParameterLayout
         layout.add(std::make_unique<juce::AudioParameterFloat>("distortionClarity","distortionClarity",
                                     juce::NormalisableRange<float>(0.f, 5000.f, 0.5f, 1.f),
                                     1000.0f));
+
+        /* Delay parameters
+         * delayTime: Amount of time between current sample and the delayed sample added to the signal
+         * delayWetLevel: Determines ratio of clean signal and delayed signal
+         * delayFeedback: Controls the decay time of the wet signal
+         */
+        layout.add(std::make_unique<juce::AudioParameterFloat>("delayTime","delayTime",
+                                    juce::NormalisableRange<float>(0.f, MAX_DELAY_TIME, (MAX_DELAY_TIME / 10), 1.f),
+                                    0.4f));
+        layout.add(std::make_unique<juce::AudioParameterFloat>("delayWetLevel","delayWetLevel",
+                                    juce::NormalisableRange<float>(0.f, 1.f, 0.1f, 1.f),
+                                    0.6f));
+        layout.add(std::make_unique<juce::AudioParameterFloat>("delayFeedback","delayFeedback",
+                                    juce::NormalisableRange<float>(0.f, 1.f, 0.1f, 1.f),
+                                    0.2f));
 
         /* Reverb parameters
          * reverbIntensity: Dampening of the reverb. 0 is fully dampened.
