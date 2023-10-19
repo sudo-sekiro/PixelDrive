@@ -1,6 +1,8 @@
 #ifndef DELAY_CLASS_HEADER
 #define DELAY_CLASS_HEADER
 
+#define MAX_DELAY_TIME 2.f
+
 //==============================================================================
 template <typename Type>
 class DelayLine
@@ -58,14 +60,7 @@ class Delay
 {
 public:
     //==============================================================================
-    Delay()
-    {
-        setMaxDelayTime (2.0f);
-        setDelayTime (0, 0.7f);
-        setDelayTime (1, 0.5f);
-        setWetLevel (0.8f);
-        setFeedback (0.5f);
-    }
+    Delay() {}
 
     //==============================================================================
     void prepare (const juce::dsp::ProcessSpec& spec)
@@ -74,6 +69,7 @@ public:
         sampleRate = (Type) spec.sampleRate;
         updateDelayLineSize();
         updateDelayTime();
+        setMaxDelayTime(MAX_DELAY_TIME);
 
         filterCoefs = juce::dsp::IIR::Coefficients<Type>::makeFirstOrderHighPass (sampleRate, Type (1000));;
 
@@ -137,6 +133,13 @@ public:
         updateDelayTime();
     }
 
+    //==============================================================================
+    void setParameters(ChainSettings chainSettings, size_t channel)
+    {
+        setDelayTime(channel, chainSettings.delayTime);
+        setWetLevel(chainSettings.delayWetLevel);
+        setFeedback(chainSettings.delayFeedback);
+    }
     //==============================================================================
     template <typename ProcessContext>
     void process (const ProcessContext& context) noexcept
