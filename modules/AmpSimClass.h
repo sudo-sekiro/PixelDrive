@@ -76,9 +76,9 @@ public:
     void prepare (const juce::dsp::ProcessSpec& spec)
     {
         ProcessorChain.prepare(spec);
-        processorChain.get<AmpChainPositions::LowPassIndex>().state = FilterCoefs::makeFirstOrderLowPass (spec.sampleRate, 500.0f); // 0 - 500 hz
-        processorChain.get<AmpChainPositions::HighPassIndex>().state = FilterCoefs::makeFirstOrderHighPass (spec.sampleRate, 15000.0f);//15- -> 20kz
-        updatePeakFilter (spec.sampleRate, &processorChain.get<AmpChainPositions::MidFilterIndex>, 12.f); //-24 -> 24 linear gain
+        processorChain.get<AmpChainPositions::LowPassIndex>().state = FilterCoefs::makeFirstOrderHighPass (spec.sampleRate, 500.0f);
+        processorChain.get<AmpChainPositions::HighPassIndex>().state = FilterCoefs::makeFirstOrderLowPass (spec.sampleRate, 15000.0f);
+        updatePeakFilter (spec.sampleRate, &processorChain.get<AmpChainPositions::MidFilterIndex>, 12.f);
         processorChain.get<AmpChainPositions::inputGainIndex>().setGainDecibels (1.f);
     }
 
@@ -98,10 +98,27 @@ public:
 
 
     //==============================================================================
-    void updateParams(ChainSettings ChainSettings)
+    void updateParams(ChainSettings chainSettings)
     {
         // Set gain, low pass, highpass and peak freq, update any convolution changes for cab sim
-        juce::ignoreUnused(ChainSettings)
+        #define INPUTRANGEMIN 0
+        #define INPUTRANGEMAX 10
+        #define LOWPASSFREQ 500
+        #define HIGHPASSBASEFREQ 15000
+        #define HIGHPASSMAXFREQ 20000
+        #define MAXMIDGAIN 24.f
+        #define MINMIDGAIN -24.f
+        // Set lowpass cutoff frequency in the range 0 - 500 hz
+        float lowCutFreq = juce::jmap( chainSettings.ampLowEnd, INPUTRANGEMIN, INPUTRANGEMAX, 500, 0);
+        processorChain.get<AmpChainPositions::LowCutIndex>().state = FilterCoefs::makeFirstOrderHighPass (spec.sampleRate, lowCutFreq);
+        // Set highpass cutoff frequency in the range 15000 - 20000 hz
+        float highCutFreq =  juce::jmap(chainSettings.ampHighEnd, INPUTRANGEMIN, INPUTRANGEMAX, HIGHPASSBASEFREQ, HIGHPASSMAXFREQ);
+        processorChain.get<AmpChainPositions::HighCutIndex>().state = FilterCoefs::makeFirstOrderLowPass (spec.sampleRate, highCutFreq);
+        // Set gain of the peak filter between -24 and 24 dbs
+        float midGain = juce::jmap(chainSettings.ampMids, INPUTRANGEMIN, INPUTRANGEMAX, MINMIDGAIN, MAXMIDGAIN)
+        updatePeakFilter (spec.sampleRate, &processorChain.get<AmpChainPositions::MidFilterIndex>, midGain);
+        // Set input Gain
+        processorChain.get<AmpChainPositions::inputGainIndex>().setGainDecibels (chainSettings.ampInputGain);
     }
 
     //==============================================================================
@@ -115,9 +132,9 @@ private:
     enum AmpChainPositions
     {
         inputGainIndex,
-        LowPassIndex,
+        LowCutIndex,
         MidFilterIndex,
-        HighPassIndex,
+        HighCutIndex,
         CabSimIndex
     };
 
