@@ -134,12 +134,20 @@ public:
     }
 
     //==============================================================================
-    void setParameters(ChainSettings chainSettings, size_t channel)
+    void setBypassed (bool newValue) noexcept
+    {
+        bypassed = newValue;
+    }
+
+    //==============================================================================
+    void setParams(ChainSettings chainSettings, size_t channel)
     {
         setDelayTime(channel, chainSettings.delayTime);
         setWetLevel(chainSettings.delayWetLevel);
         setFeedback(chainSettings.delayFeedback);
+        setBypassed(chainSettings.delayBypass);
     }
+
     //==============================================================================
     template <typename ProcessContext>
     void process (const ProcessContext& context) noexcept
@@ -166,8 +174,12 @@ public:
                 auto inputSample = input[i];
                 auto dlineInputSample = std::tanh (inputSample + feedback * delayedSample);
                 dline.push (dlineInputSample);
-                auto outputSample = inputSample + wetLevel * delayedSample;
-                output[i] = outputSample;
+                if (bypassed) {
+                    output[i] = inputSample;
+                } else {
+                    auto outputSample = inputSample + wetLevel * delayedSample;
+                    output[i] = outputSample;
+                }
             }
         }
     }
@@ -185,6 +197,7 @@ private:
 
     Type sampleRate   { Type (44.1e3) };
     Type maxDelayTime { Type (2) };
+    bool bypassed {false};
 
     //==============================================================================
     void updateDelayLineSize()
