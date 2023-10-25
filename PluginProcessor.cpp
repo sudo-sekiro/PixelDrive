@@ -194,24 +194,36 @@ void PixelDriveAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 
     leftDistortion.setParams(chainSettings, getSampleRate());
     rightDistortion.setParams(chainSettings, getSampleRate());
+    // Bypass distortion
+    leftChain.setBypassed<ChainPositions::distortionIndex> (chainSettings.distortionBypass);
+    rightChain.setBypassed<ChainPositions::distortionIndex> (chainSettings.distortionBypass);
 
     auto& leftAmpSim = leftChain.template get<ChainPositions::ampSimIndex>();
     auto& rightAmpSim = rightChain.template get<ChainPositions::ampSimIndex>();
 
     leftAmpSim.setParams(chainSettings, getSampleRate());
     rightAmpSim.setParams(chainSettings, getSampleRate());
+    // Bypass amp sim
+    leftChain.setBypassed<ChainPositions::ampSimIndex> (chainSettings.ampBypass);
+    rightChain.setBypassed<ChainPositions::ampSimIndex> (chainSettings.ampBypass);
 
     auto& leftDelay = leftChain.template get<ChainPositions::delayIndex>();
     auto& rightDelay = rightChain.template get<ChainPositions::delayIndex>();
 
-    leftDelay.setParameters(chainSettings, 0);
-    rightDelay.setParameters(chainSettings, 0);
+    leftDelay.setParams(chainSettings, 0);
+    rightDelay.setParams(chainSettings, 0);
+    // Bypass delay
+    leftChain.setBypassed<ChainPositions::delayIndex> (chainSettings.delayBypass);
+    rightChain.setBypassed<ChainPositions::delayIndex> (chainSettings.delayBypass);
 
     auto& leftReverb = leftChain.template get<ChainPositions::reverbIndex>();
     auto& rightReverb = rightChain.template get<ChainPositions::reverbIndex>();
 
     leftReverb.setParams(chainSettings);
     rightReverb.setParams(chainSettings);
+    // Bypass reverb
+    leftChain.setBypassed<ChainPositions::reverbIndex> (chainSettings.reverbBypass);
+    rightChain.setBypassed<ChainPositions::reverbIndex> (chainSettings.reverbBypass);
 
     auto& leftNoiseGate = leftChain.template get<ChainPositions::noiseGateIndex>();
     auto& rightNoiseGate = rightChain.template get<ChainPositions::noiseGateIndex>();
@@ -260,17 +272,20 @@ ChainSettings getChainSettings(juce::AudioProcessorValueTreeState& apvts)
     settings.distortionTone = apvts.getRawParameterValue("distortionTone")->load();
     settings.distortionPostGain = apvts.getRawParameterValue("distortionPostGain")->load();
     settings.distortionClarity = apvts.getRawParameterValue("distortionClarity")->load();
+    settings.distortionBypass = apvts.getRawParameterValue("distortionBypass")->load();
 
     // Return amp settings
     settings.ampInputGain = apvts.getRawParameterValue("ampInputGain")->load();
     settings.ampLowEnd = apvts.getRawParameterValue("ampLowEnd")->load();
     settings.ampMids = apvts.getRawParameterValue("ampMids")->load();
     settings.ampHighEnd = apvts.getRawParameterValue("ampHighEnd")->load();
+    settings.ampBypass = apvts.getRawParameterValue("ampBypass")->load();
 
     // Return delay parameters
     settings.delayTime = apvts.getRawParameterValue("delayTime")->load();
     settings.delayWetLevel = apvts.getRawParameterValue("delayWetLevel")->load();
     settings.delayFeedback = apvts.getRawParameterValue("delayFeedback")->load();
+    settings.delayBypass = apvts.getRawParameterValue("delayBypass")->load();
 
     // Return reverb parameters
     settings.reverbIntensity = apvts.getRawParameterValue("reverbIntensity")->load();
@@ -278,6 +293,7 @@ ChainSettings getChainSettings(juce::AudioProcessorValueTreeState& apvts)
     settings.reverbRoomSize = apvts.getRawParameterValue("reverbRoomSize")->load();
     settings.reverbWetMix = apvts.getRawParameterValue("reverbWetMix")->load();
     settings.reverbSpread = apvts.getRawParameterValue("reverbSpread")->load();
+    settings.reverbBypass = apvts.getRawParameterValue("reverbBypass")->load();
 
     settings.noiseGate = apvts.getRawParameterValue("noiseGate")->load();
 
@@ -297,7 +313,8 @@ juce::AudioProcessorValueTreeState::ParameterLayout
          * distortionPreGain: Input gain to the distortion class
          * distortionTone: Controls the harshness of the waveshaper equation, tanh ( tone * x)
          * distortionPostGain: Output gain of the distortion class
-         * distortionClarity: highpass filter cut off frequency to control low harmonics
+         * distortionClarity: Highpass filter cut off frequency to control low harmonics
+         * distortionBypass: Bypass distortion effect
          */
         layout.add(std::make_unique<juce::AudioParameterFloat>("distortionPreGain","distortionPreGain",
                                     juce::NormalisableRange<float>(-10.f, 100.f, 0.5f, 1.f),
@@ -311,12 +328,14 @@ juce::AudioProcessorValueTreeState::ParameterLayout
         layout.add(std::make_unique<juce::AudioParameterFloat>("distortionClarity","distortionClarity",
                                     juce::NormalisableRange<float>(0.f, 5000.f, 0.5f, 1.f),
                                     1000.0f));
+        layout.add(std::make_unique<juce::AudioParameterBool>("distortionBypass", "distortionBypass", false));
 
         /* Amp parameters
          * ampInputGain: Initial amp gain in dBs
          * ampLowEnd: Low values attenuate low frequencies.
          * ampMids: Mid frequency gain. < 5 attenuates mid frequncies, > 5 boosts mids.
          * ampHighEnd: Low values attenuate high frequencies.
+         * ampBypass: Bypass amp simulator
          */
         layout.add(std::make_unique<juce::AudioParameterFloat>("ampInputGain","ampInputGain",
                                     juce::NormalisableRange<float>(0.f, 11.f, 0.1f, 1.f),
@@ -330,11 +349,13 @@ juce::AudioProcessorValueTreeState::ParameterLayout
         layout.add(std::make_unique<juce::AudioParameterFloat>("ampHighEnd","ampHighEnd",
                                     juce::NormalisableRange<float>(0.f, 10.f, 0.1f, 1.f),
                                     10.0f));
+        layout.add(std::make_unique<juce::AudioParameterBool>("ampBypass", "ampBypass", false));
 
         /* Delay parameters
          * delayTime: Amount of time between current sample and the delayed sample added to the signal
          * delayWetLevel: Determines ratio of clean signal and delayed signal
          * delayFeedback: Controls the decay time of the wet signal
+         * delayBypass: Bypass the delay effect
          */
         layout.add(std::make_unique<juce::AudioParameterFloat>("delayTime","delayTime",
                                     juce::NormalisableRange<float>(0.f, MAX_DELAY_TIME, (MAX_DELAY_TIME / 10), 1.f),
@@ -345,6 +366,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout
         layout.add(std::make_unique<juce::AudioParameterFloat>("delayFeedback","delayFeedback",
                                     juce::NormalisableRange<float>(0.f, 1.f, 0.1f, 1.f),
                                     0.1f));
+        layout.add(std::make_unique<juce::AudioParameterBool>("delayBypass", "delayBypass", false));
 
         /* Reverb parameters
          * reverbIntensity: Dampening of the reverb. 0 is fully dampened.
@@ -352,6 +374,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout
          * reverbWetMix: Changes the ratio of wet and dry. 1 is all wet 0 is all dry.
          * reverbSpread: Sets the spread. 1 is high.
          * reverbShimmer: Enable feedback mode.
+         * reverbBypass: bypass the reverb effect
          */
         layout.add(std::make_unique<juce::AudioParameterFloat>("reverbIntensity","reverbIntensity",
                                     juce::NormalisableRange<float>(0.f, 1.f, 0.1f, 1.f),
@@ -366,6 +389,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout
                                     juce::NormalisableRange<float>(0.f, 1.f, 0.1f, 1.f),
                                     1.f));
         layout.add(std::make_unique<juce::AudioParameterBool>("reverbShimmer", "reverbShimmer", false));
+        layout.add(std::make_unique<juce::AudioParameterBool>("reverbBypass", "reverbBypass", false));
 
         layout.add(std::make_unique<juce::AudioParameterFloat>("noiseGate","noiseGate",
                                     juce::NormalisableRange<float>(10000.f, 20000.f, 0.5f, 1.f),
