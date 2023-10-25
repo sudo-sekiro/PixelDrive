@@ -57,68 +57,83 @@ public:
     AmpSimulator() {}
 
     //==============================================================================
-    void updatePeakFilter(double sampleRate, juce::dsp::IIR::Filter<float>& peakFilter, float peakGainInDecibels)
+    void updatePeakFilter(double sampleRate, juce::dsp::IIR::Filter<float>::CoefficientsPtr peakFilterCoeffs, float peakGainInDecibels)
     {
-        float peakFreq = 5000
-        float peakQ = 0.5f
+        float peakFreq = 1550;
+        float peakQ = 0.1f;
 
-        peakFilter.state = juce::dsp::IIR::Coefficients<float>::makePeakFilter
-            (
-                sampleRate,
-                peakFreq,
-                peakQ,
-                juce::Decibels::decibelsToGain(
-                    peakGainInDecibels)
-            );
+        *peakFilterCoeffs = *juce::dsp::IIR::Coefficients<float>::makePeakFilter
+        (
+            sampleRate,
+            peakFreq,
+            peakQ,
+            juce::Decibels::decibelsToGain(
+                peakGainInDecibels)
+        );
     }
 
     //==============================================================================
     void prepare (const juce::dsp::ProcessSpec& spec)
     {
-        ProcessorChain.prepare(spec);
-        processorChain.get<AmpChainPositions::LowPassIndex>().state = FilterCoefs::makeFirstOrderHighPass (spec.sampleRate, 500.0f);
-        processorChain.get<AmpChainPositions::HighPassIndex>().state = FilterCoefs::makeFirstOrderLowPass (spec.sampleRate, 15000.0f);
-        updatePeakFilter (spec.sampleRate, &processorChain.get<AmpChainPositions::MidFilterIndex>, 12.f);
-        processorChain.get<AmpChainPositions::inputGainIndex>().setGainDecibels (1.f);
-    }
+        ampProcessorChain.prepare(spec);
+        auto lowCutCoeffs = ampProcessorChain.get<AmpChainPositions::LowCutIndex>().coefficients;
+        *lowCutCoeffs = *FilterCoefs::makeFirstOrderHighPass (spec.sampleRate, 0.0f);
 
+        auto highCutCoeffs = ampProcessorChain.get<AmpChainPositions::HighCutIndex>().coefficients;
+        *highCutCoeffs = *FilterCoefs::makeFirstOrderLowPass (spec.sampleRate, 20000.0f);
+
+        updatePeakFilter (spec.sampleRate, ampProcessorChain.get<AmpChainPositions::MidFilterIndex>().coefficients, 12.f);
+
+        ampProcessorChain.get<AmpChainPositions::inputGainIndex>().setGainDecibels (1.f);
+
+        ampProcessorChain.setBypassed<AmpChainPositions::LowCutIndex>(false);
+        ampProcessorChain.setBypassed<AmpChainPositions::HighCutIndex>(false);
+        ampProcessorChain.setBypassed<AmpChainPositions::MidFilterIndex>(false);
+    }
     //==============================================================================
     template <typename ProcessContext>
     void process (const ProcessContext& context) noexcept
     {
-        ProcessorChain.process(context);
+        ampProcessorChain.process(context);
     }
 
     //==============================================================================
     void reset() noexcept
     {
-        ProcessorChain.reset();
+        ampProcessorChain.reset();
     }
 
 
 
     //==============================================================================
-    void updateParams(ChainSettings chainSettings)
+    void setParams(ChainSettings chainSettings, double sampleRate)
     {
         // Set gain, low pass, highpass and peak freq, update any convolution changes for cab sim
-        #define INPUTRANGEMIN 0
-        #define INPUTRANGEMAX 10
-        #define LOWPASSFREQ 500
-        #define HIGHPASSBASEFREQ 15000
-        #define HIGHPASSMAXFREQ 20000
+        #define INPUTRANGEMIN 0.f
+        #define INPUTRANGEMAX 10.f
+        #define LOWCUTFREQMIN 0.f
+        #define LOWCUTFREQMAX 1500.f
+        #define HIGHCUTBASEFREQ 4000.f
+        #define HIGHCUTMAXFREQ 20000.f
         #define MAXMIDGAIN 24.f
         #define MINMIDGAIN -24.f
-        // Set lowpass cutoff frequency in the range 0 - 500 hz
-        float lowCutFreq = juce::jmap( chainSettings.ampLowEnd, INPUTRANGEMIN, INPUTRANGEMAX, 500, 0);
-        processorChain.get<AmpChainPositions::LowCutIndex>().state = FilterCoefs::makeFirstOrderHighPass (spec.sampleRate, lowCutFreq);
-        // Set highpass cutoff frequency in the range 15000 - 20000 hz
-        float highCutFreq =  juce::jmap(chainSettings.ampHighEnd, INPUTRANGEMIN, INPUTRANGEMAX, HIGHPASSBASEFREQ, HIGHPASSMAXFREQ);
-        processorChain.get<AmpChainPositions::HighCutIndex>().state = FilterCoefs::makeFirstOrderLowPass (spec.sampleRate, highCutFreq);
+
+        // Set lowpass cutoff frequency
+        auto lowCutFreq = juce::jmap(chainSettings.ampLowEnd, INPUTRANGEMIN, INPUTRANGEMAX, LOWCUTFREQMAX, LOWCUTFREQMIN);
+        auto lowCutCoeffs = ampProcessorChain.get<AmpChainPositions::LowCutIndex>().coefficients;
+        *lowCutCoeffs = *FilterCoefs::makeFirstOrderHighPass (sampleRate, lowCutFreq);
+
+        // Set highpass cutoff frequency
+        auto highCutFreq =  juce::jmap(chainSettings.ampHighEnd, INPUTRANGEMIN, INPUTRANGEMAX, HIGHCUTBASEFREQ, HIGHCUTMAXFREQ);
+        auto highCutCoeffs = ampProcessorChain.get<AmpChainPositions::HighCutIndex>().coefficients;
+        *highCutCoeffs = *FilterCoefs::makeFirstOrderLowPass (sampleRate, highCutFreq);
+
         // Set gain of the peak filter between -24 and 24 dbs
-        float midGain = juce::jmap(chainSettings.ampMids, INPUTRANGEMIN, INPUTRANGEMAX, MINMIDGAIN, MAXMIDGAIN)
-        updatePeakFilter (spec.sampleRate, &processorChain.get<AmpChainPositions::MidFilterIndex>, midGain);
+        auto midGain = juce::jmap(chainSettings.ampMids, INPUTRANGEMIN, INPUTRANGEMAX, MINMIDGAIN, MAXMIDGAIN);
+        updatePeakFilter (sampleRate, ampProcessorChain.get<AmpChainPositions::MidFilterIndex>().coefficients, midGain);
+
         // Set input Gain
-        processorChain.get<AmpChainPositions::inputGainIndex>().setGainDecibels (chainSettings.ampInputGain);
+        ampProcessorChain.get<AmpChainPositions::inputGainIndex>().setGainDecibels (chainSettings.ampInputGain);
     }
 
     //==============================================================================
@@ -138,8 +153,8 @@ private:
         CabSimIndex
     };
 
-    using Filter = juce::dsp::IIR::Filter<float>;
-    using FilterCoefs = juce::dsp::IIR::Coefficients<float>;
+    using Filter = juce::dsp::IIR::Filter<Type>;
+    using FilterCoefs = juce::dsp::IIR::Coefficients<Type>;
 
-    juce::dsp::ProcessorChain<juce::dsp::Gain<Type>, Filter, Filter, Filter, CabSimulator<float>> processorChain;
+    juce::dsp::ProcessorChain<juce::dsp::Gain<Type>, Filter, Filter, Filter, CabSimulator<float>> ampProcessorChain;
 };
