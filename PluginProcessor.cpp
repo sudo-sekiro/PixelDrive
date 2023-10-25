@@ -195,6 +195,12 @@ void PixelDriveAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     leftDistortion.setParams(chainSettings, getSampleRate());
     rightDistortion.setParams(chainSettings, getSampleRate());
 
+    auto& leftAmpSim = leftChain.template get<ChainPositions::ampSimIndex>();
+    auto& rightAmpSim = rightChain.template get<ChainPositions::ampSimIndex>();
+
+    leftAmpSim.setParams(chainSettings, getSampleRate());
+    rightAmpSim.setParams(chainSettings, getSampleRate());
+
     auto& leftDelay = leftChain.template get<ChainPositions::delayIndex>();
     auto& rightDelay = rightChain.template get<ChainPositions::delayIndex>();
 
@@ -255,6 +261,12 @@ ChainSettings getChainSettings(juce::AudioProcessorValueTreeState& apvts)
     settings.distortionPostGain = apvts.getRawParameterValue("distortionPostGain")->load();
     settings.distortionClarity = apvts.getRawParameterValue("distortionClarity")->load();
 
+    // Return amp settings
+    settings.ampInputGain = apvts.getRawParameterValue("ampInputGain")->load();
+    settings.ampLowEnd = apvts.getRawParameterValue("ampLowEnd")->load();
+    settings.ampMids = apvts.getRawParameterValue("ampMids")->load();
+    settings.ampHighEnd = apvts.getRawParameterValue("ampHighEnd")->load();
+
     // Return delay parameters
     settings.delayTime = apvts.getRawParameterValue("delayTime")->load();
     settings.delayWetLevel = apvts.getRawParameterValue("delayWetLevel")->load();
@@ -300,6 +312,25 @@ juce::AudioProcessorValueTreeState::ParameterLayout
                                     juce::NormalisableRange<float>(0.f, 5000.f, 0.5f, 1.f),
                                     1000.0f));
 
+        /* Amp parameters
+         * ampInputGain: Initial amp gain in dBs
+         * ampLowEnd: Low values attenuate low frequencies.
+         * ampMids: Mid frequency gain. < 5 attenuates mid frequncies, > 5 boosts mids.
+         * ampHighEnd: Low values attenuate high frequencies.
+         */
+        layout.add(std::make_unique<juce::AudioParameterFloat>("ampInputGain","ampInputGain",
+                                    juce::NormalisableRange<float>(0.f, 11.f, 0.1f, 1.f),
+                                    1.0f));
+        layout.add(std::make_unique<juce::AudioParameterFloat>("ampLowEnd","ampLowEnd",
+                                    juce::NormalisableRange<float>(0.f, 10.f, 0.1f, 1.f),
+                                    10.0f));
+        layout.add(std::make_unique<juce::AudioParameterFloat>("ampMids","ampMids",
+                                    juce::NormalisableRange<float>(0.f, 10.f, 0.1f, 1.f),
+                                    5.0f));
+        layout.add(std::make_unique<juce::AudioParameterFloat>("ampHighEnd","ampHighEnd",
+                                    juce::NormalisableRange<float>(0.f, 10.f, 0.1f, 1.f),
+                                    10.0f));
+
         /* Delay parameters
          * delayTime: Amount of time between current sample and the delayed sample added to the signal
          * delayWetLevel: Determines ratio of clean signal and delayed signal
@@ -307,13 +338,13 @@ juce::AudioProcessorValueTreeState::ParameterLayout
          */
         layout.add(std::make_unique<juce::AudioParameterFloat>("delayTime","delayTime",
                                     juce::NormalisableRange<float>(0.f, MAX_DELAY_TIME, (MAX_DELAY_TIME / 10), 1.f),
-                                    0.4f));
+                                    0.2f));
         layout.add(std::make_unique<juce::AudioParameterFloat>("delayWetLevel","delayWetLevel",
                                     juce::NormalisableRange<float>(0.f, 1.f, 0.1f, 1.f),
-                                    0.6f));
+                                    0.4f));
         layout.add(std::make_unique<juce::AudioParameterFloat>("delayFeedback","delayFeedback",
                                     juce::NormalisableRange<float>(0.f, 1.f, 0.1f, 1.f),
-                                    0.2f));
+                                    0.1f));
 
         /* Reverb parameters
          * reverbIntensity: Dampening of the reverb. 0 is fully dampened.
