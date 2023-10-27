@@ -1,5 +1,6 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
+#include "ClampOutput.h"
 
 //==============================================================================
 PixelDriveAudioProcessor::PixelDriveAudioProcessor()
@@ -171,6 +172,10 @@ void PixelDriveAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     // interleaved by keeping the same state.
 
     juce::dsp::AudioBlock<float> block(buffer);
+
+    auto numSamples = block.getNumSamples();
+    // Clamp output to prevent feedback
+    protectYourEars(buffer, numSamples, totalNumInputChannels);
 
     auto LeftBlock = block.getSingleChannelBlock(0);
     auto RightBlock = block.getSingleChannelBlock(1);
