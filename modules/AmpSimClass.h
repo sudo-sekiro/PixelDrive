@@ -89,6 +89,13 @@ public:
         ampProcessorChain.setBypassed<AmpChainPositions::LowCutIndex>(false);
         ampProcessorChain.setBypassed<AmpChainPositions::HighCutIndex>(false);
         ampProcessorChain.setBypassed<AmpChainPositions::MidFilterIndex>(false);
+
+        auto& waveShaper = ampProcessorChain.template get<waveShaperIndex>();
+
+        waveShaper.functionToUse = [] (Type x)
+                                   {
+                                       return std::tanh(x);
+                                   };
     }
     //==============================================================================
     template <typename ProcessContext>
@@ -150,11 +157,12 @@ private:
         LowCutIndex,
         MidFilterIndex,
         HighCutIndex,
+        waveShaperIndex,
         CabSimIndex
     };
 
     using Filter = juce::dsp::IIR::Filter<Type>;
     using FilterCoefs = juce::dsp::IIR::Coefficients<Type>;
 
-    juce::dsp::ProcessorChain<juce::dsp::Gain<Type>, Filter, Filter, Filter, CabSimulator<float>> ampProcessorChain;
+    juce::dsp::ProcessorChain<juce::dsp::Gain<Type>, Filter, Filter, Filter, juce::dsp::WaveShaper<Type, std::function<Type(Type)>>, CabSimulator<float>> ampProcessorChain;
 };
