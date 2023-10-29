@@ -245,8 +245,8 @@ bool PixelDriveAudioProcessor::hasEditor() const
 
 juce::AudioProcessorEditor* PixelDriveAudioProcessor::createEditor()
 {
-    // return new PixelDriveAudioProcessorEditor (*this);
-    return new juce::GenericAudioProcessorEditor (*this);
+    return new PixelDriveAudioProcessorEditor (*this);
+    // return new juce::GenericAudioProcessorEditor (*this);
 }
 
 //==============================================================================
