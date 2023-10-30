@@ -3,7 +3,33 @@
 
 //==============================================================================
 PixelDriveAudioProcessorEditor::PixelDriveAudioProcessorEditor (PixelDriveAudioProcessor& p)
-    : AudioProcessorEditor (&p), processorRef (p)
+    : AudioProcessorEditor (&p), processorRef (p),
+    preGainSliderAttachment(p.apvts, "preGain", preGainSlider),
+    // Distortion attachments
+    distortionPreGainSliderAttachment(p.apvts, "distortionPreGain", distortionPreGainSlider),
+    distortionToneSliderAttachment(p.apvts, "distortionTone", distortionToneSlider),
+    distortionPostGainSliderAttachment(p.apvts, "distortionPostGain", distortionPostGainSlider),
+    distortionClaritySliderAttachment(p.apvts, "distortionClarity", distortionClaritySlider),
+    distortionBypassButtonAttachment(p.apvts, "distortionBypass", distortionBypassButton),
+    // Amp attachments
+    ampInputGainSliderAttachment(p.apvts, "ampInputGain", ampInputGainSlider),
+    ampLowEndSliderAttachment(p.apvts, "ampLowEnd", ampLowEndSlider),
+    ampMidsSliderAttachment(p.apvts, "ampMids", ampMidsSlider),
+    ampHighEndSliderAttachment(p.apvts, "ampHighEnd", ampHighEndSlider),
+    ampBypassButtonAttachment(p.apvts, "ampBypass", ampBypassButton),
+    // Delay attachments
+    delayTimeSliderAttachment(p.apvts, "delayTime", delayTimeSlider),
+    delayWetLevelSliderAttachment(p.apvts, "delayWetLevel", delayWetLevelSlider),
+    delayFeedbackSliderAttachment(p.apvts, "delayFeedback", delayFeedbackSlider),
+    delayBypassButtonAttachment(p.apvts, "delayBypass", delayBypassButton),
+    // Reverb attachments
+    reverbIntensitySliderAttachment(p.apvts, "reverbIntensity", reverbIntensitySlider),
+    reverbRoomSizeSliderAttachment(p.apvts, "reverbRoomSize", reverbRoomSizeSlider),
+    reverbWetMixSliderAttachment(p.apvts, "reverbWetMix", reverbWetMixSlider),
+    reverbSpreadSliderAttachment(p.apvts, "reverbSpread", reverbSpreadSlider),
+    reverbBypassButtonAttachment(p.apvts, "reverbBypass", reverbBypassButton),
+    reverbShimmerButtonAttachment(p.apvts, "reverbShimmer", reverbShimmerButton),
+    noiseGateSliderAttachment(p.apvts, "noiseGate", noiseGateSlider)
 {
     juce::ignoreUnused (processorRef);
     // Make sure that before the constructor has finished, you've set the
@@ -66,7 +92,7 @@ void PixelDriveAudioProcessorEditor::resized()
     delayWetLevelSlider.setBounds(delayBoundsTopRow.removeFromLeft(delayBoundsTopRow.getWidth() / 2));
     delayFeedbackSlider.setBounds(delayBoundsTopRow);
     delayBypassButton.setBounds(delayBounds);
-    //Add reverb sliders
+    // Add reverb sliders
     auto reverbBoundsTopRow = bounds.removeFromTop(bounds.getHeight() / 3);
     reverbIntensitySlider.setBounds(reverbBoundsTopRow.removeFromLeft(reverbBoundsTopRow.getWidth() / 2));
     reverbWetMixSlider.setBounds(reverbBoundsTopRow);

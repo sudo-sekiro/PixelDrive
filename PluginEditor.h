@@ -51,5 +51,19 @@ private:
 
     std::vector<juce::Component*> getComps();
 
+    using APVTS = juce::AudioProcessorValueTreeState;
+    using Attachment = APVTS::SliderAttachment;
+
+    using ButtonAttachment = APVTS::ButtonAttachment;
+
+    Attachment preGainSliderAttachment,
+               distortionPreGainSliderAttachment, distortionToneSliderAttachment, distortionPostGainSliderAttachment, distortionClaritySliderAttachment,
+               ampInputGainSliderAttachment, ampLowEndSliderAttachment, ampMidsSliderAttachment, ampHighEndSliderAttachment,
+               delayTimeSliderAttachment, delayWetLevelSliderAttachment, delayFeedbackSliderAttachment,
+               reverbIntensitySliderAttachment, reverbRoomSizeSliderAttachment, reverbWetMixSliderAttachment, reverbSpreadSliderAttachment,
+               noiseGateSliderAttachment;
+
+    ButtonAttachment distortionBypassButtonAttachment, ampBypassButtonAttachment, delayBypassButtonAttachment, reverbBypassButtonAttachment, reverbShimmerButtonAttachment;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PixelDriveAudioProcessorEditor)
 };
