@@ -38,11 +38,25 @@ PixelDriveAudioProcessorEditor::PixelDriveAudioProcessorEditor (PixelDriveAudioP
     {
         addAndMakeVisible(comp);
     }
+
+    const auto& params = processorRef.getParameters();
+    for ( auto param : params )
+    {
+        param->addListener(this);
+    }
+
+    startTimerHz(60);
+
     setSize (900, 600);
 }
 
 PixelDriveAudioProcessorEditor::~PixelDriveAudioProcessorEditor()
 {
+    const auto& params = processorRef.getParameters();
+    for ( auto param : params )
+    {
+        param->removeListener(this);
+    }
 }
 
 //==============================================================================
@@ -101,6 +115,20 @@ void PixelDriveAudioProcessorEditor::resized()
     reverbSpreadSlider.setBounds(reverbBoundsMidRow);
     reverbShimmerButton.setBounds(bounds.removeFromTop(bounds.getHeight() / 2));
     reverbBypassButton.setBounds(bounds);
+}
+
+void PixelDriveAudioProcessorEditor::parameterValueChanged(int parameterIndex, float newValue)
+{
+    juce::ignoreUnused(parameterIndex, newValue);
+    parametersChanged.set(true);
+}
+
+void PixelDriveAudioProcessorEditor::timerCallback()
+{
+    if( parametersChanged.compareAndSetBool(false, true) )
+    {
+        processorRef.updateParameters();
+    }
 }
 
 std::vector<juce::Component*> PixelDriveAudioProcessorEditor::getComps()

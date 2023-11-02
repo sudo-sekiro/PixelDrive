@@ -13,7 +13,9 @@ struct CustomRotarySlider : juce::Slider
 
 struct CustomToggleButton : juce::ToggleButton { };
 //==============================================================================
-class PixelDriveAudioProcessorEditor  : public juce::AudioProcessorEditor
+class PixelDriveAudioProcessorEditor  : public juce::AudioProcessorEditor,
+                                        juce::AudioProcessorParameter::Listener,
+                                        juce::Timer
 {
 public:
     explicit PixelDriveAudioProcessorEditor (PixelDriveAudioProcessor&);
@@ -23,10 +25,19 @@ public:
     void paint (juce::Graphics&) override;
     void resized() override;
 
+    void parameterValueChanged (int parameterIndex, float newValue) override;
+    void parameterGestureChanged (int parameterIndex, bool gestureIsStarting) override
+    {
+        juce::ignoreUnused(parameterIndex, gestureIsStarting);
+    };
+    void timerCallback() override;
+
 private:
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
     PixelDriveAudioProcessor& processorRef;
+
+    juce::Atomic<bool> parametersChanged { false };
 
     CustomRotarySlider preGainSlider;
 
