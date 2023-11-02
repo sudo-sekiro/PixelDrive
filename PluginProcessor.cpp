@@ -114,6 +114,8 @@ void PixelDriveAudioProcessor::prepareToPlay (double sampleRate, int samplesPerB
 
     leftPreGain.setGainDecibels (chainSettings.preGain);
     rightPreGain.setGainDecibels (chainSettings.preGain);
+
+    updateParameters();
 }
 
 void PixelDriveAudioProcessor::releaseResources()
@@ -186,55 +188,10 @@ void PixelDriveAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     leftChain.process(leftContext);
     rightChain.process(rightContext);
 
-    auto& leftPreGain = leftChain.template get<ChainPositions::preGainIndex>();
-    auto& rightPreGain = rightChain.template get<ChainPositions::preGainIndex>();
-
-    auto chainSettings = getChainSettings(apvts);
-
-    leftPreGain.setGainDecibels (chainSettings.preGain);
-    rightPreGain.setGainDecibels (chainSettings.preGain);
-
     auto& leftDistortion = leftChain.template get<ChainPositions::distortionIndex>();
     auto& rightDistortion = rightChain.template get<ChainPositions::distortionIndex>();
-
-    leftDistortion.setParams(chainSettings, getSampleRate());
-    rightDistortion.setParams(chainSettings, getSampleRate());
-    // Bypass distortion
-    leftChain.setBypassed<ChainPositions::distortionIndex> (chainSettings.distortionBypass);
-    rightChain.setBypassed<ChainPositions::distortionIndex> (chainSettings.distortionBypass);
-
-    auto& leftAmpSim = leftChain.template get<ChainPositions::ampSimIndex>();
-    auto& rightAmpSim = rightChain.template get<ChainPositions::ampSimIndex>();
-
-    leftAmpSim.setParams(chainSettings, getSampleRate());
-    rightAmpSim.setParams(chainSettings, getSampleRate());
-    // Bypass amp sim
-    leftChain.setBypassed<ChainPositions::ampSimIndex> (chainSettings.ampBypass);
-    rightChain.setBypassed<ChainPositions::ampSimIndex> (chainSettings.ampBypass);
-
-    auto& leftDelay = leftChain.template get<ChainPositions::delayIndex>();
-    auto& rightDelay = rightChain.template get<ChainPositions::delayIndex>();
-
-    leftDelay.setParams(chainSettings, 0);
-    rightDelay.setParams(chainSettings, 0);
-    // Bypass delay
-    leftChain.setBypassed<ChainPositions::delayIndex> (chainSettings.delayBypass);
-    rightChain.setBypassed<ChainPositions::delayIndex> (chainSettings.delayBypass);
-
-    auto& leftReverb = leftChain.template get<ChainPositions::reverbIndex>();
-    auto& rightReverb = rightChain.template get<ChainPositions::reverbIndex>();
-
-    leftReverb.setParams(chainSettings);
-    rightReverb.setParams(chainSettings);
-    // Bypass reverb
-    leftChain.setBypassed<ChainPositions::reverbIndex> (chainSettings.reverbBypass);
-    rightChain.setBypassed<ChainPositions::reverbIndex> (chainSettings.reverbBypass);
-
-    auto& leftNoiseGate = leftChain.template get<ChainPositions::noiseGateIndex>();
-    auto& rightNoiseGate = rightChain.template get<ChainPositions::noiseGateIndex>();
-
-    leftNoiseGate.state = FilterCoefs::makeFirstOrderLowPass (getSampleRate(), chainSettings.noiseGate);
-    rightNoiseGate.state = FilterCoefs::makeFirstOrderLowPass (getSampleRate(), chainSettings.noiseGate);
+    leftDistortion.updateWaveShaper();
+    rightDistortion.updateWaveShaper();
 }
 
 //==============================================================================
@@ -403,6 +360,59 @@ juce::AudioProcessorValueTreeState::ParameterLayout
 
         return layout;
     }
+
+void PixelDriveAudioProcessor::updateParameters()
+{
+    auto chainSettings = getChainSettings(apvts);
+
+    auto& leftPreGain = leftChain.template get<ChainPositions::preGainIndex>();
+    auto& rightPreGain = rightChain.template get<ChainPositions::preGainIndex>();
+
+    leftPreGain.setGainDecibels (chainSettings.preGain);
+    rightPreGain.setGainDecibels (chainSettings.preGain);
+
+    auto& leftDistortion = leftChain.template get<ChainPositions::distortionIndex>();
+    auto& rightDistortion = rightChain.template get<ChainPositions::distortionIndex>();
+
+    leftDistortion.setParams(chainSettings, getSampleRate());
+    rightDistortion.setParams(chainSettings, getSampleRate());
+    // Bypass distortion
+    leftChain.setBypassed<ChainPositions::distortionIndex> (chainSettings.distortionBypass);
+    rightChain.setBypassed<ChainPositions::distortionIndex> (chainSettings.distortionBypass);
+
+    auto& leftAmpSim = leftChain.template get<ChainPositions::ampSimIndex>();
+    auto& rightAmpSim = rightChain.template get<ChainPositions::ampSimIndex>();
+
+    leftAmpSim.setParams(chainSettings, getSampleRate());
+    rightAmpSim.setParams(chainSettings, getSampleRate());
+    // // Bypass amp sim
+    leftChain.setBypassed<ChainPositions::ampSimIndex> (chainSettings.ampBypass);
+    rightChain.setBypassed<ChainPositions::ampSimIndex> (chainSettings.ampBypass);
+
+    auto& leftDelay = leftChain.template get<ChainPositions::delayIndex>();
+    auto& rightDelay = rightChain.template get<ChainPositions::delayIndex>();
+
+    leftDelay.setParams(chainSettings, 0);
+    rightDelay.setParams(chainSettings, 0);
+    // Bypass delay
+    leftChain.setBypassed<ChainPositions::delayIndex> (chainSettings.delayBypass);
+    rightChain.setBypassed<ChainPositions::delayIndex> (chainSettings.delayBypass);
+
+    auto& leftReverb = leftChain.template get<ChainPositions::reverbIndex>();
+    auto& rightReverb = rightChain.template get<ChainPositions::reverbIndex>();
+
+    leftReverb.setParams(chainSettings);
+    rightReverb.setParams(chainSettings);
+    // Bypass reverb
+    leftChain.setBypassed<ChainPositions::reverbIndex> (chainSettings.reverbBypass);
+    rightChain.setBypassed<ChainPositions::reverbIndex> (chainSettings.reverbBypass);
+
+    auto& leftNoiseGate = leftChain.template get<ChainPositions::noiseGateIndex>();
+    auto& rightNoiseGate = rightChain.template get<ChainPositions::noiseGateIndex>();
+
+    leftNoiseGate.state = FilterCoefs::makeFirstOrderLowPass (getSampleRate(), chainSettings.noiseGate);
+    rightNoiseGate.state = FilterCoefs::makeFirstOrderLowPass (getSampleRate(), chainSettings.noiseGate);
+}
 
 //==============================================================================
 // This creates new instances of the plugin..
