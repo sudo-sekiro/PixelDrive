@@ -46,12 +46,15 @@ public:
     void setParams(ChainSettings chainSettings, double sampleRate)
     {
         // Set how hard the wave shaper clipping is. High tone values approach a squarewave
-        auto& waveshaper = processorChain.template get<waveshaperIndex>();
-        auto tone = chainSettings.distortionTone;
-        waveshaper.functionToUse = [=] (Type x)
+        auto toneValue = chainSettings.distortionTone;
+        if (lastToneValue != toneValue) {
+            toneChanged = true;
+            waveShaperLambda = [=] (Type x)
                                    {
-                                       return std::tanh(tone * x);
+                                       return std::tanh(toneValue * x);
                                    };
+            lastToneValue = toneValue;
+        }
 
         auto& preGain = processorChain.template get<preGainIndex>();
         preGain.setGainDecibels (chainSettings.distortionPreGain);
@@ -63,6 +66,15 @@ public:
         filter.state = FilterCoefs::makeFirstOrderHighPass (sampleRate, chainSettings.distortionClarity);
     }
 
+    //==============================================================================
+    void updateWaveShaper()
+    {
+        if (toneChanged) {
+            auto& waveshaper = processorChain.template get<waveshaperIndex>();
+            waveshaper.functionToUse = waveShaperLambda;
+            toneChanged = false;
+        }
+    }
 private:
     //==============================================================================
     enum
@@ -72,6 +84,10 @@ private:
         waveshaperIndex,
         postGainIndex
     };
+
+    float lastToneValue = 1;
+    bool toneChanged = false;
+    std::function<Type(Type)> waveShaperLambda;
 
     using Filter = juce::dsp::IIR::Filter<Type>;
     using FilterCoefs = juce::dsp::IIR::Coefficients<Type>;
