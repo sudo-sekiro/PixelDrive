@@ -77,7 +77,7 @@ public:
     {
         ampProcessorChain.prepare(spec);
         auto lowCutCoeffs = ampProcessorChain.get<AmpChainPositions::LowCutIndex>().coefficients;
-        *lowCutCoeffs = *FilterCoefs::makeFirstOrderHighPass (spec.sampleRate, 0.0f);
+        *lowCutCoeffs = *FilterCoefs::makeFirstOrderHighPass (spec.sampleRate, 1.0f);
 
         auto highCutCoeffs = ampProcessorChain.get<AmpChainPositions::HighCutIndex>().coefficients;
         *highCutCoeffs = *FilterCoefs::makeFirstOrderLowPass (spec.sampleRate, 20000.0f);
@@ -118,7 +118,7 @@ public:
         // Set gain, low pass, highpass and peak freq, update any convolution changes for cab sim
         #define INPUTRANGEMIN 0.f
         #define INPUTRANGEMAX 10.f
-        #define LOWCUTFREQMIN 0.f
+        #define LOWCUTFREQMIN 1.f
         #define LOWCUTFREQMAX 1500.f
         #define HIGHCUTBASEFREQ 4000.f
         #define HIGHCUTMAXFREQ 20000.f
