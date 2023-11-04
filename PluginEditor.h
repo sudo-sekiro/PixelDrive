@@ -1,15 +1,7 @@
 #pragma once
 
 #include "PluginProcessor.h"
-
-struct CustomRotarySlider : juce::Slider
-{
-    CustomRotarySlider() : juce::Slider(juce::Slider::SliderStyle::RotaryHorizontalVerticalDrag,
-                                        juce::Slider::TextEntryBoxPosition::NoTextBox)
-    {
-
-    }
-};
+#include "UserInterface/CustomSlider.h"
 
 struct CustomToggleButton : juce::ToggleButton { };
 //==============================================================================
