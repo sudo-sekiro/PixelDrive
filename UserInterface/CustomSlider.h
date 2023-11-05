@@ -35,6 +35,7 @@ struct CustomRotarySlider : juce::Slider
     juce::Rectangle<int> getSliderBounds() const;
     int getTextHeight() const {return 14; }
     juce::String getDisplayString() const;
+    void addSliderLabels(juce::String minLabel, juce::String maxLabel, juce::String titleLabel);
 private:
     LookAndFeel lnf;
 };

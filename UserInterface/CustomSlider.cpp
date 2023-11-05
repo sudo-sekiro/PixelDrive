@@ -108,3 +108,10 @@ juce::Rectangle<int> CustomRotarySlider::getSliderBounds() const
     r.setY(getTextHeight());
     return r;
 }
+
+void CustomRotarySlider::addSliderLabels(juce::String minLabel, juce::String maxLabel, juce::String titleLabel)
+{
+    labels.add({0.f, minLabel});
+    labels.add({1.f, maxLabel});
+    labels.add({2.f, titleLabel});
+}
