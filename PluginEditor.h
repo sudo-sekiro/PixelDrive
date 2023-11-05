@@ -2,21 +2,8 @@
 
 #include "PluginProcessor.h"
 #include "UserInterface/CustomSlider.h"
-struct CustomToggleButton : juce::ToggleButton
-{
-    CustomToggleButton() :
-        juce::ToggleButton()
-    {
-        setLookAndFeel(&lnf);
-    }
-    ~CustomToggleButton()
-    {
-        setLookAndFeel(nullptr);
-    }
-    int getTextHeight() const {return 14; }
-private:
-    LookAndFeel lnf;
-};
+#include "UserInterface/CustomToggle.h"
+
 //==============================================================================
 class PixelDriveAudioProcessorEditor  : public juce::AudioProcessorEditor,
                                         juce::AudioProcessorParameter::Listener,
