@@ -35,6 +35,9 @@ PixelDriveAudioProcessorEditor::PixelDriveAudioProcessorEditor (PixelDriveAudioP
     juce::ignoreUnused (processorRef);
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
+
+    addLabels();
+
     for (auto* comp : getComps())
     {
         addAndMakeVisible(comp);
@@ -101,7 +104,7 @@ void PixelDriveAudioProcessorEditor::resized()
     // Reverb and delay padding
     bounds.removeFromTop(bounds.getHeight() / 10);
     bounds.removeFromBottom(bounds.getHeight() / 10);
-    auto delayBounds = bounds.removeFromTop(bounds.getHeight() / 2);
+    auto delayBounds = bounds.removeFromTop(bounds.getHeight() / 3);
     auto delayBoundsTopRow = delayBounds.removeFromTop(delayBounds.getHeight() / 2);
     delayTimeSlider.setBounds(delayBoundsTopRow.removeFromLeft(delayBoundsTopRow.getWidth() / 3));
     delayWetLevelSlider.setBounds(delayBoundsTopRow.removeFromLeft(delayBoundsTopRow.getWidth() / 2));
@@ -143,4 +146,41 @@ std::vector<juce::Component*> PixelDriveAudioProcessorEditor::getComps()
         &reverbIntensitySlider, &reverbShimmerButton, &reverbRoomSizeSlider, &reverbWetMixSlider, &reverbSpreadSlider, &reverbBypassButton,
         &noiseGateSlider
     };
+}
+
+void PixelDriveAudioProcessorEditor::addLabels()
+{
+    /* Add label, max and min values */
+    // Pregain
+    preGainSlider.addSliderLabels("-24dB", "24dB", "Pregain");
+
+    // Distortion labels
+    distortionPreGainSlider.addSliderLabels("-10dB", "100dB", "Input Gain");
+    distortionToneSlider.addSliderLabels("0", "10", "Tone");
+    distortionPostGainSlider.addSliderLabels("-24dB", "24dB", "Output Gain");
+    distortionClaritySlider.addSliderLabels("0", "10", "Clarity");
+    // distortionBypassButton
+
+    // Amp labels
+    ampInputGainSlider.addSliderLabels("0", "11", "Input Gain");
+    ampLowEndSlider.addSliderLabels("0", "11", "Bass");
+    ampMidsSlider.addSliderLabels("0", "11", "Mids");
+    ampHighEndSlider.addSliderLabels("0", "11", "Treble");
+    //ampBypassButton,
+
+    // Delay labels
+    delayTimeSlider.addSliderLabels("0", ((juce::String)MAX_DELAY_TIME), "Time");
+    delayWetLevelSlider.addSliderLabels("0", "10", "Wet Mix");
+    delayFeedbackSlider.addSliderLabels("0", "10", "Feedback");
+    // delayBypassButton,
+
+    // Reverb labels
+    reverbIntensitySlider.addSliderLabels("0", "10", "Intensity");
+    reverbRoomSizeSlider.addSliderLabels("0", "10", "Room Size");
+    reverbWetMixSlider.addSliderLabels("0", "10", "Wet Mix");
+    reverbSpreadSlider.addSliderLabels("0", "10", "Spread");
+    // reverbShimmerButton, reverbBypassButton
+
+    // Noise Gate
+    noiseGateSlider.addSliderLabels("10000", "20000", "Noise Gate");
 }

@@ -23,6 +23,7 @@ public:
         juce::ignoreUnused(parameterIndex, gestureIsStarting);
     };
     void timerCallback() override;
+    void addLabels();
 
 private:
     // This reference is provided as a quick way for your editor to
