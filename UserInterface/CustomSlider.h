@@ -1,16 +1,7 @@
 #ifndef __USER_INTERFACE__CUSTOMSLIDER_
 #define __USER_INTERFACE__CUSTOMSLIDER_
 
-struct LookAndFeel : juce::LookAndFeel_V4
-{
-    virtual void drawRotarySlider (juce::Graphics& g,
-                                   int x, int y, int width, int height,
-                                   float sliderPosProportional,
-                                   float rotaryStartAngle,
-                                   float rotaryEndAngle,
-                                   juce::Slider& slider) override;
-};
-
+#include "LookAndFeel.h"
 struct CustomRotarySlider : juce::Slider
 {
     CustomRotarySlider() :
