@@ -36,19 +36,19 @@ private:
 
     // Distortion slider
     CustomRotarySlider distortionPreGainSlider, distortionToneSlider, distortionPostGainSlider, distortionClaritySlider;
-    CustomToggleButton distortionBypassButton;
+    CustomToggleButton distortionBypassButton{"Bypass"};
 
     // Amp sliders
     CustomRotarySlider ampInputGainSlider, ampLowEndSlider, ampMidsSlider, ampHighEndSlider;
-    CustomToggleButton ampBypassButton;
+    CustomToggleButton ampBypassButton{"Bypass"};
 
     // Delay sliders
     CustomRotarySlider delayTimeSlider, delayWetLevelSlider, delayFeedbackSlider;
-    CustomToggleButton delayBypassButton;
+    CustomToggleButton delayBypassButton{"Bypass"};
 
     // Reverb sliders
     CustomRotarySlider reverbIntensitySlider, reverbRoomSizeSlider, reverbWetMixSlider, reverbSpreadSlider;
-    CustomToggleButton reverbBypassButton, reverbShimmerButton;
+    CustomToggleButton reverbBypassButton{"Bypass"}, reverbShimmerButton{"Shimmer"};
 
     // Noise gate slider
     CustomRotarySlider noiseGateSlider;

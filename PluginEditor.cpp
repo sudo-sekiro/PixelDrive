@@ -84,7 +84,8 @@ void PixelDriveAudioProcessorEditor::resized()
     auto distortionBounds = bounds.removeFromLeft(bounds.getWidth() / 4);
 
     // Distortion top row
-    auto distortionBoundsTop = distortionBounds.removeFromTop(distortionBounds.getHeight() / 2);
+    distortionBounds.removeFromTop(distortionBounds.getHeight() / 4);
+    auto distortionBoundsTop = distortionBounds.removeFromTop(distortionBounds.getHeight() / 4);
     distortionToneSlider.setBounds(distortionBoundsTop.removeFromLeft(distortionBoundsTop.getWidth() / 3));
     distortionBypassButton.setBounds(distortionBoundsTop.removeFromLeft(distortionBoundsTop.getWidth() / 2));
     distortionClaritySlider.setBounds(distortionBoundsTop);
@@ -94,8 +95,8 @@ void PixelDriveAudioProcessorEditor::resized()
     // Add amp sliders
     auto ampBounds = bounds.removeFromLeft(bounds.getWidth() * 2 / 3);
     // Add amp padding
-    ampBounds.removeFromTop(ampBounds.getHeight() / 10);
-    ampBounds.removeFromBottom(ampBounds.getHeight() / 10);
+    ampBounds.removeFromTop(ampBounds.getHeight() / 2);
+    ampBounds.removeFromBottom(ampBounds.getHeight() / 2);
     // Add amp sliders
     ampInputGainSlider.setBounds(ampBounds.removeFromLeft(ampBounds.getWidth() / 5));
     ampLowEndSlider.setBounds(ampBounds.removeFromLeft(ampBounds.getWidth() / 4));
@@ -103,8 +104,8 @@ void PixelDriveAudioProcessorEditor::resized()
     ampHighEndSlider.setBounds(ampBounds.removeFromLeft(ampBounds.getWidth() / 2));
     ampBypassButton.setBounds(ampBounds);
     // Reverb and delay padding
-    bounds.removeFromTop(bounds.getHeight() / 10);
-    bounds.removeFromBottom(bounds.getHeight() / 10);
+    bounds.removeFromTop(bounds.getHeight() / 20);
+    bounds.removeFromBottom(bounds.getHeight() / 20);
     auto delayBounds = bounds.removeFromTop(bounds.getHeight() / 3);
     auto delayBoundsTopRow = delayBounds.removeFromTop(delayBounds.getHeight() / 2);
     delayTimeSlider.setBounds(delayBoundsTopRow.removeFromLeft(delayBoundsTopRow.getWidth() / 3));
@@ -112,6 +113,7 @@ void PixelDriveAudioProcessorEditor::resized()
     delayFeedbackSlider.setBounds(delayBoundsTopRow);
     delayBypassButton.setBounds(delayBounds);
     // Add reverb sliders
+    bounds.removeFromBottom(bounds.getHeight() / 20);
     auto reverbBoundsTopRow = bounds.removeFromTop(bounds.getHeight() / 3);
     reverbIntensitySlider.setBounds(reverbBoundsTopRow.removeFromLeft(reverbBoundsTopRow.getWidth() / 2));
     reverbWetMixSlider.setBounds(reverbBoundsTopRow);
