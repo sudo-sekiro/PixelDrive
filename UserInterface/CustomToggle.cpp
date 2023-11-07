@@ -10,6 +10,12 @@ void LookAndFeel::drawToggleButton(juce::Graphics& g,
 
     auto bounds = toggleButton.getLocalBounds();
     // g.drawRect(bounds);
+
+    auto textBox = bounds.removeFromTop(getTextHeight());
+    auto str = toggleButton.getButtonText ();
+    g.setColour(Colour(0u, 172u, 1u));
+    g.drawFittedText(str, textBox.toNearestInt(), juce::Justification::centred, 1);
+
     auto size = jmin(bounds.getWidth(), bounds.getHeight());
     auto r = bounds.withSizeKeepingCentre(size, size).toFloat();
     // g.drawRect(r);

@@ -14,6 +14,8 @@ struct LookAndFeel : juce::LookAndFeel_V4
                                    juce::ToggleButton& toggleButton,
                                    bool shouldDrawButtonAsHighlighted,
                                    bool shouldDrawButtonAsDown) override;
+
+    int getTextHeight() const {return 14; }
 };
 
 #endif //__USER_INTERFACE__LOOKANDFEEL_

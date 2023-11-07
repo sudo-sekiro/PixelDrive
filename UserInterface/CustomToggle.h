@@ -10,11 +10,18 @@ struct CustomToggleButton : juce::ToggleButton
     {
         setLookAndFeel(&lnf);
     }
+    explicit CustomToggleButton(juce::String label) :
+        juce::ToggleButton(label)
+    {
+        setLookAndFeel(&lnf);
+    }
     ~CustomToggleButton()
     {
         setLookAndFeel(nullptr);
     }
+    // void paintButton (juce::Graphics&, bool, bool) override;
     int getTextHeight() const {return 14; }
+    // juce::String label;
 private:
     LookAndFeel lnf;
 };
