@@ -350,7 +350,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout
         layout.add(std::make_unique<juce::AudioParameterFloat>("reverbSpread","reverbSpread",
                                     juce::NormalisableRange<float>(0.f, 1.f, 0.1f, 1.f),
                                     1.f));
-        layout.add(std::make_unique<juce::AudioParameterBool>("reverbShimmer", "reverbShimmer", false));
+        layout.add(std::make_unique<juce::AudioParameterBool>("reverbShimmer", "reverbShimmer", true));
         layout.add(std::make_unique<juce::AudioParameterBool>("reverbBypass", "reverbBypass", false));
 
         layout.add(std::make_unique<juce::AudioParameterFloat>("noiseGate","noiseGate",
