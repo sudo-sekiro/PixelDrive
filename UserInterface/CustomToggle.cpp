@@ -23,7 +23,7 @@ void LookAndFeel::drawToggleButton(juce::Graphics& g,
     Rectangle<float> base = r.withSizeKeepingCentre(size / 1.5f, size / 4.5f).toFloat();
     base.setY(r.getCentreY());
 
-    auto buttonHeight = toggleButton.getToggleState() ?  size / 10 : size / 5;
+    auto buttonHeight = toggleButton.getToggleState() ?  size / 5 : size / 10;
     Rectangle<float> cylinder = r.withSizeKeepingCentre(size / 2.f, (float)buttonHeight).toFloat();
     cylinder.setBottom(base.getCentreY());
     Rectangle<float> cylinderTop = cylinder.withTrimmedBottom(cylinder.getHeight() / 2);
