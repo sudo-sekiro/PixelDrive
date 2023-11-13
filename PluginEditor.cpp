@@ -174,5 +174,5 @@ void PixelDriveAudioProcessorEditor::addLabels() {
     reverbSpreadSlider.addSliderLabels("0", "10", "Spread");
 
     // Noise Gate
-    noiseGateSlider.addSliderLabels("10000", "20000", "Noise Gate");
+    noiseGateSlider.addSliderLabels("100", "20000", "Noise Gate");
 }

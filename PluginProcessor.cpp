@@ -85,11 +85,11 @@ void PixelDriveAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBl
 
     spec.sampleRate = sampleRate;
 
-    auto& leftnoiseGate = leftChain.get<ChainPositions::noiseGateIndex>();
-    leftnoiseGate.state = FilterCoefs::makeFirstOrderLowPass(spec.sampleRate, 10000.0f);
+    auto& leftNoiseGate = leftChain.get<ChainPositions::noiseGateIndex>();
+    updateNoiseGate(leftNoiseGate, 17500, sampleRate);
 
     auto& rightNoiseGate = rightChain.get<ChainPositions::noiseGateIndex>();
-    rightNoiseGate.state = FilterCoefs::makeFirstOrderLowPass(spec.sampleRate, 10000.0f);
+    updateNoiseGate(rightNoiseGate, 17500, sampleRate);
 
     leftChain.prepare(spec);
     rightChain.prepare(spec);
@@ -262,7 +262,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout
                                     juce::NormalisableRange<float>(-10.f, 100.f, 0.5f, 1.f),
                                     50.0f));
         layout.add(std::make_unique<juce::AudioParameterFloat>("distortionTone", "distortionTone",
-                                    juce::NormalisableRange<float>(0.01f, 100.f, 0.5f, 1.f),
+                                    juce::NormalisableRange<float>(0.01f, 10.f, 0.5f, 1.f),
                                     5.0f));
         layout.add(std::make_unique<juce::AudioParameterFloat>("distortionPostGain", "distortionPostGain",
                                     juce::NormalisableRange<float>(-24.f, 24.f, 0.5f, 1.f),
@@ -280,7 +280,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout
          * ampBypass: Bypass amp simulator
          */
         layout.add(std::make_unique<juce::AudioParameterFloat>("ampInputGain", "ampInputGain",
-                                    juce::NormalisableRange<float>(0.f, 11.f, 0.1f, 1.f),
+                                    juce::NormalisableRange<float>(0.f, 100.f, 0.1f, 1.f),
                                     1.0f));
         layout.add(std::make_unique<juce::AudioParameterFloat>("ampLowEnd", "ampLowEnd",
                                     juce::NormalisableRange<float>(0.f, 10.f, 0.1f, 1.f),
@@ -334,12 +334,22 @@ juce::AudioProcessorValueTreeState::ParameterLayout
         layout.add(std::make_unique<juce::AudioParameterBool>("reverbBypass", "reverbBypass", false));
 
         layout.add(std::make_unique<juce::AudioParameterFloat>("noiseGate", "noiseGate",
-                                    juce::NormalisableRange<float>(10000.f, 20000.f, 0.5f, 1.f),
+                                    juce::NormalisableRange<float>(100.f, 20000.f, 0.5f, 1.f),
                                     17500.0f));
 
 
         return layout;
     }
+
+void PixelDriveAudioProcessor::updateNoiseGate(FilterChain& cutChain, float cutoffFreq, double sampleRate) {
+    auto cutCoefficients = juce::dsp::FilterDesign<float>::designIIRLowpassHighOrderButterworthMethod(cutoffFreq,
+                                                                                                      sampleRate,
+                                                                                                      8);
+    *cutChain.template get<0>().coefficients = *cutCoefficients[0];
+    *cutChain.template get<1>().coefficients = *cutCoefficients[1];
+    *cutChain.template get<2>().coefficients = *cutCoefficients[2];
+    *cutChain.template get<3>().coefficients = *cutCoefficients[3];
+}
 
 void PixelDriveAudioProcessor::updateParameters() {
     auto chainSettings = getChainSettings(apvts);
@@ -389,8 +399,8 @@ void PixelDriveAudioProcessor::updateParameters() {
     auto& leftNoiseGate = leftChain.template get<ChainPositions::noiseGateIndex>();
     auto& rightNoiseGate = rightChain.template get<ChainPositions::noiseGateIndex>();
 
-    leftNoiseGate.state = FilterCoefs::makeFirstOrderLowPass(getSampleRate(), chainSettings.noiseGate);
-    rightNoiseGate.state = FilterCoefs::makeFirstOrderLowPass(getSampleRate(), chainSettings.noiseGate);
+    updateNoiseGate(leftNoiseGate, chainSettings.noiseGate, getSampleRate());
+    updateNoiseGate(rightNoiseGate, chainSettings.noiseGate, getSampleRate());
 }
 
 //==============================================================================

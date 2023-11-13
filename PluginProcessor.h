@@ -61,6 +61,10 @@ class PixelDriveAudioProcessor  : public juce::AudioProcessor {
 
     void updateParameters();
 
+    using Filter = juce::dsp::IIR::Filter<float>;
+    using FilterChain = juce::dsp::ProcessorChain<Filter, Filter, Filter, Filter>;
+    void updateNoiseGate(FilterChain& cutChain, float cutoffFreq, double sampleRate);
+
  private:
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PixelDriveAudioProcessor);
@@ -74,12 +78,10 @@ class PixelDriveAudioProcessor  : public juce::AudioProcessor {
         noiseGateIndex
     };
 
-    using Filter = juce::dsp::IIR::Filter<float>;
     using FilterCoefs = juce::dsp::IIR::Coefficients<float>;
 
     using MonoChain = juce::dsp::ProcessorChain<juce::dsp::Gain<float>, Distortion<float>, AmpSimulator<float>,
-                                                Delay<float, 1>, Reverb<float>,
-                                                juce::dsp::ProcessorDuplicator<Filter, FilterCoefs>>;
+                                                Delay<float, 1>, Reverb<float>, FilterChain>;
 
     MonoChain leftChain, rightChain;
 };
