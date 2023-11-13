@@ -8,13 +8,15 @@ void LookAndFeel::drawRotarySlider(juce::Graphics &g,
                                    float sliderPosProportional,
                                    float rotaryStartAngle,
                                    float rotaryEndAngle,
-                                   juce::Slider & slider)
-{
-    using namespace juce;
+                                   juce::Slider & slider) {
+    using juce::Rectangle, juce::jmap, juce::Colour, juce::Path, juce:: AffineTransform;
 
     juce::ignoreUnused(slider);
 
-    auto bounds = Rectangle<float>((float)x, (float)y, (float)width, (float)height);
+    auto bounds = Rectangle<float>(static_cast<float>(x),
+                                   static_cast<float>(y),
+                                   static_cast<float>(width),
+                                   static_cast<float>(height));
 
     g.setColour(Colour(255u, 154u, 1u));
     g.drawEllipse(bounds, 1.f);
@@ -42,9 +44,8 @@ void LookAndFeel::drawRotarySlider(juce::Graphics &g,
 }
 
 //======================================================================
-void CustomRotarySlider::paint(juce::Graphics &g)
-{
-    using namespace juce;
+void CustomRotarySlider::paint(juce::Graphics &g) {
+    using juce::Rectangle, juce::jmap, juce::Colour, juce::degreesToRadians, juce::MathConstants;
     auto startAng = degreesToRadians(180.f + 45.f);
     auto endAng = degreesToRadians(180.f - 45.f) + MathConstants<float>::twoPi;
 
@@ -63,7 +64,11 @@ void CustomRotarySlider::paint(juce::Graphics &g)
                                       sliderBounds.getY(),
                                       sliderBounds.getWidth(),
                                       sliderBounds.getHeight(),
-                                      jmap<float>((float)getValue(), (float)range.getStart(), (float)range.getEnd(), 0.0f, 1.0f),
+                                      jmap<float>(static_cast<float>(getValue()),
+                                                  static_cast<float>(range.getStart()),
+                                                  static_cast<float>(range.getEnd()),
+                                                  0.0f,
+                                                  1.0f),
                                       startAng,
                                       endAng,
                                       *this);
@@ -71,10 +76,9 @@ void CustomRotarySlider::paint(juce::Graphics &g)
     auto center = sliderBounds.toFloat().getCentre();
     auto radius = sliderBounds.toFloat().getHeight() / 2.f;
     g.setColour(Colour(0u, 172u, 1u));
-    g.setFont((float)getTextHeight());
+    g.setFont(static_cast<float>(getTextHeight()));
     auto numChoices = labels.size();
-    for (int i = 0; i < numChoices; i++)
-    {
+    for (int i = 0; i < numChoices; i++) {
         auto pos = labels[i].pos;
         if (pos >= 0.f && pos <= 1.f) {
             auto ang = jmap(pos, 0.f, 1.f, startAng, endAng);
@@ -83,22 +87,21 @@ void CustomRotarySlider::paint(juce::Graphics &g)
 
             Rectangle<float> r;
             auto str = labels[i].label;
-            r.setSize((float)g.getCurrentFont().getStringWidth(str), (float)getTextHeight());
+            r.setSize(static_cast<float>(g.getCurrentFont().getStringWidth(str)), static_cast<float>(getTextHeight()));
             r.setCentre(c);
             r.setY(r.getY() + getTextHeight());
             g.drawFittedText(str, r.toNearestInt(), juce::Justification::centred, 1);
         } else {
             Rectangle<float> r;
             auto str = labels[i].label;
-            r.setSize((float)g.getCurrentFont().getStringWidth(str), (float)getTextHeight());
+            r.setSize(static_cast<float>(g.getCurrentFont().getStringWidth(str)), static_cast<float>(getTextHeight()));
             r.setCentre(getLocalBounds().toFloat().getWidth() / 2.f, getTextHeight() / 2.f);
             g.drawFittedText(str, r.toNearestInt(), juce::Justification::centred, 1);
         }
     }
 }
 
-juce::Rectangle<int> CustomRotarySlider::getSliderBounds() const
-{
+juce::Rectangle<int> CustomRotarySlider::getSliderBounds() const {
     auto bounds = getLocalBounds();
     auto size = juce::jmin(bounds.getWidth(), bounds.getHeight());
     size -= getTextHeight() * 2;
@@ -109,8 +112,7 @@ juce::Rectangle<int> CustomRotarySlider::getSliderBounds() const
     return r;
 }
 
-void CustomRotarySlider::addSliderLabels(juce::String minLabel, juce::String maxLabel, juce::String titleLabel)
-{
+void CustomRotarySlider::addSliderLabels(juce::String minLabel, juce::String maxLabel, juce::String titleLabel) {
     labels.add({0.f, minLabel});
     labels.add({1.f, maxLabel});
     labels.add({2.f, titleLabel});

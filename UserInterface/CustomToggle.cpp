@@ -3,16 +3,15 @@
 void LookAndFeel::drawToggleButton(juce::Graphics& g,
                                    juce::ToggleButton& toggleButton,
                                    bool shouldDrawButtonAsHighlighted,
-                                   bool shouldDrawButtonAsDown)
-{
-    using namespace juce;
+                                   bool shouldDrawButtonAsDown) {
+    using juce::Rectangle, juce::ignoreUnused, juce::Colour, juce::jmin;
     ignoreUnused(shouldDrawButtonAsHighlighted, shouldDrawButtonAsDown);
 
     auto bounds = toggleButton.getLocalBounds();
     // g.drawRect(bounds);
 
     auto textBox = bounds.removeFromTop(getTextHeight());
-    auto str = toggleButton.getButtonText ();
+    auto str = toggleButton.getButtonText();
     g.setColour(Colour(0u, 172u, 1u));
     g.drawFittedText(str, textBox.toNearestInt(), juce::Justification::centred, 1);
 
@@ -24,18 +23,18 @@ void LookAndFeel::drawToggleButton(juce::Graphics& g,
     base.setY(r.getCentreY());
 
     auto buttonHeight = toggleButton.getToggleState() ?  size / 5 : size / 10;
-    Rectangle<float> cylinder = r.withSizeKeepingCentre(size / 2.f, (float)buttonHeight).toFloat();
+    Rectangle<float> cylinder = r.withSizeKeepingCentre(size / 2.f, static_cast<float>(buttonHeight)).toFloat();
     cylinder.setBottom(base.getCentreY());
     Rectangle<float> cylinderTop = cylinder.withTrimmedBottom(cylinder.getHeight() / 2);
 
-    auto colour = toggleButton.getToggleState() ?  Colours::dimgrey : Colour(0u, 172u, 1u);
+    auto colour = toggleButton.getToggleState() ?  juce::Colours::dimgrey : Colour(0u, 172u, 1u);
     g.setColour(colour);
     g.fillEllipse(base);
-    g.setColour(Colours::black);
+    g.setColour(juce::Colours::black);
     g.drawEllipse(base, 2.f);
 
-    g.setColour(Colours::silver);
+    g.setColour(juce::Colours::silver);
     g.fillRoundedRectangle(cylinder, size / 8.f);
-    g.setColour(Colours::black);
+    g.setColour(juce::Colours::black);
     g.drawEllipse(cylinderTop, 2.f);
 }

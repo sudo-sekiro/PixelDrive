@@ -1,16 +1,15 @@
-#ifndef __USER_INTERFACE__LOOKANDFEEL_
-#define __USER_INTERFACE__LOOKANDFEEL_
+#ifndef USERINTERFACE_LOOKANDFEEL_H_
+#define USERINTERFACE_LOOKANDFEEL_H_
 
-struct LookAndFeel : juce::LookAndFeel_V4
-{
-    virtual void drawRotarySlider (juce::Graphics& g,
+struct LookAndFeel : juce::LookAndFeel_V4 {
+    void drawRotarySlider(juce::Graphics& g,
                                    int x, int y, int width, int height,
                                    float sliderPosProportional,
                                    float rotaryStartAngle,
                                    float rotaryEndAngle,
                                    juce::Slider& slider) override;
 
-    virtual void drawToggleButton (juce::Graphics& g,
+    void drawToggleButton(juce::Graphics& g,
                                    juce::ToggleButton& toggleButton,
                                    bool shouldDrawButtonAsHighlighted,
                                    bool shouldDrawButtonAsDown) override;
@@ -18,4 +17,4 @@ struct LookAndFeel : juce::LookAndFeel_V4
     int getTextHeight() const {return 14; }
 };
 
-#endif //__USER_INTERFACE__LOOKANDFEEL_
+#endif  // USERINTERFACE_LOOKANDFEEL_H_

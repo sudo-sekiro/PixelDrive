@@ -1,22 +1,18 @@
-#ifndef __USER_INTERFACE__CUSTOMSLIDER_
-#define __USER_INTERFACE__CUSTOMSLIDER_
+#ifndef USERINTERFACE_CUSTOMSLIDER_H_
+#define USERINTERFACE_CUSTOMSLIDER_H_
 
 #include "LookAndFeel.h"
-struct CustomRotarySlider : juce::Slider
-{
+struct CustomRotarySlider : juce::Slider {
     CustomRotarySlider() :
         juce::Slider(juce::Slider::SliderStyle::RotaryHorizontalVerticalDrag,
-                     juce::Slider::TextEntryBoxPosition::NoTextBox)
-    {
+                     juce::Slider::TextEntryBoxPosition::NoTextBox) {
         setLookAndFeel(&lnf);
     }
-    ~CustomRotarySlider()
-    {
+    ~CustomRotarySlider() {
         setLookAndFeel(nullptr);
     }
 
-    struct LabelPos
-    {
+    struct LabelPos {
         float pos;
         juce::String label;
     };
@@ -27,8 +23,8 @@ struct CustomRotarySlider : juce::Slider
     int getTextHeight() const {return 14; }
     juce::String getDisplayString() const;
     void addSliderLabels(juce::String minLabel, juce::String maxLabel, juce::String titleLabel);
-private:
+ private:
     LookAndFeel lnf;
 };
 
-#endif // __USER_INTERFACE__CUSTOMSLIDER_
+#endif  // USERINTERFACE_CUSTOMSLIDER_H_
