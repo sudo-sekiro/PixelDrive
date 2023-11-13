@@ -1,84 +1,78 @@
+#ifndef MODULES_DISTORTIONCLASS_H_
+#define MODULES_DISTORTIONCLASS_H_
+
 //==============================================================================
 template <typename Type>
 class Distortion
 {
-public:
+ public:
     //==============================================================================
-    Distortion()
-    {
-        auto& waveshaper = processorChain.template get<waveshaperIndex>(); // [5]
+    Distortion() {
+        auto& waveshaper = processorChain.template get<waveshaperIndex>();
 
-        waveshaper.functionToUse = [] (Type x)
-                                   {
+        waveshaper.functionToUse = [] (Type x) {
                                        return std::tanh(x);
                                    };
 
         auto& preGain = processorChain.template get<preGainIndex>();
-        preGain.setGainDecibels (50.0f);
+        preGain.setGainDecibels(50.0f);
 
         auto& postGain = processorChain.template get<postGainIndex>();
-        postGain.setGainDecibels (0.f);
+        postGain.setGainDecibels(0.f);
     }
 
     //==============================================================================
-    void prepare (const juce::dsp::ProcessSpec& spec)
-    {
+    void prepare(const juce::dsp::ProcessSpec& spec) {
         auto& filter = processorChain.template get<filterIndex>();
-        filter.state = FilterCoefs::makeFirstOrderHighPass (spec.sampleRate, 1000.0f);
+        filter.state = FilterCoefs::makeFirstOrderHighPass(spec.sampleRate, 1000.0f);
 
-        processorChain.prepare (spec);
+        processorChain.prepare(spec);
     }
 
     //==============================================================================
     template <typename ProcessContext>
-    void process (const ProcessContext& context) noexcept
-    {
-        processorChain.process (context);
+    void process(const ProcessContext& context) noexcept {
+        processorChain.process(context);
     }
 
     //==============================================================================
-    void reset() noexcept
-    {
+    void reset() noexcept {
         processorChain.reset();
     }
 
     //==============================================================================
-    void setParams(ChainSettings chainSettings, double sampleRate)
-    {
+    void setParams(ChainSettings chainSettings, double sampleRate) {
         // Set how hard the wave shaper clipping is. High tone values approach a squarewave
         auto toneValue = chainSettings.distortionTone;
         if (lastToneValue != toneValue) {
             toneChanged = true;
-            waveShaperLambda = [=] (Type x)
-                                   {
+            waveShaperLambda = [=] (Type x) {
                                        return std::tanh(toneValue * x);
                                    };
             lastToneValue = toneValue;
         }
 
         auto& preGain = processorChain.template get<preGainIndex>();
-        preGain.setGainDecibels (chainSettings.distortionPreGain);
+        preGain.setGainDecibels(chainSettings.distortionPreGain);
 
         auto& postGain = processorChain.template get<postGainIndex>();
-        postGain.setGainDecibels (chainSettings.distortionPostGain);
+        postGain.setGainDecibels(chainSettings.distortionPostGain);
 
         auto& filter = processorChain.template get<filterIndex>();
-        filter.state = FilterCoefs::makeFirstOrderHighPass (sampleRate, chainSettings.distortionClarity);
+        filter.state = FilterCoefs::makeFirstOrderHighPass(sampleRate, chainSettings.distortionClarity);
     }
 
     //==============================================================================
-    void updateWaveShaper()
-    {
+    void updateWaveShaper() {
         if (toneChanged) {
             auto& waveshaper = processorChain.template get<waveshaperIndex>();
             waveshaper.functionToUse = waveShaperLambda;
             toneChanged = false;
         }
     }
-private:
+ private:
     //==============================================================================
-    enum
-    {
+    enum {
         filterIndex,
         preGainIndex,
         waveshaperIndex,
@@ -92,5 +86,10 @@ private:
     using Filter = juce::dsp::IIR::Filter<Type>;
     using FilterCoefs = juce::dsp::IIR::Coefficients<Type>;
 
-    juce::dsp::ProcessorChain<juce::dsp::ProcessorDuplicator<Filter, FilterCoefs>, juce::dsp::Gain<Type>, juce::dsp::WaveShaper<Type, std::function<Type(Type)>>, juce::dsp::Gain<Type>> processorChain; // [1]
+    juce::dsp::ProcessorChain<juce::dsp::ProcessorDuplicator<Filter, FilterCoefs>,
+                              juce::dsp::Gain<Type>,
+                              juce::dsp::WaveShaper<Type, std::function<Type(Type)>>,
+                              juce::dsp::Gain<Type>> processorChain;
 };
+
+#endif  // MODULES_DISTORTIONCLASS_H_

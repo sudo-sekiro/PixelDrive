@@ -1,48 +1,46 @@
+#ifndef MODULES_AMPSIMCLASS_H_
+#define MODULES_AMPSIMCLASS_H_
+
 //==============================================================================
 template <typename Type>
-class CabSimulator
-{
-public:
+class CabSimulator {
+ public:
     //==============================================================================
-    CabSimulator()
-    {
+    CabSimulator() {
         auto dir = juce::File::getCurrentWorkingDirectory();
 
         int numTries = 0;
 
-        while (! dir.getChildFile ("Resources").exists() && numTries++ < 15)
+        while (!dir.getChildFile("Resources").exists() && numTries++ < 15)
             dir = dir.getParentDirectory();
 
-        auto impulseFile = dir.getChildFile ("Resources").getChildFile ("thrash_amp.wav");// ("guitar_amp.wav");
+        auto impulseFile = dir.getChildFile("Resources").getChildFile("thrash_amp.wav");  // ("guitar_amp.wav");
         assert(impulseFile.existsAsFile());
 
-        convolution.loadImpulseResponse (impulseFile,
-                                         juce::dsp::Convolution::Stereo::no,
-                                         juce::dsp::Convolution::Trim::no,
-                                         1024,
-                                         juce::dsp::Convolution::Normalise::yes);
+        convolution.loadImpulseResponse(impulseFile,
+                                        juce::dsp::Convolution::Stereo::no,
+                                        juce::dsp::Convolution::Trim::no,
+                                        1024,
+                                        juce::dsp::Convolution::Normalise::yes);
     }
 
     //==============================================================================
-    void prepare (const juce::dsp::ProcessSpec& spec)
-    {
+    void prepare(const juce::dsp::ProcessSpec& spec) {
         convolution.prepare(spec);
     }
 
     //==============================================================================
     template <typename ProcessContext>
-    void process (const ProcessContext& context) noexcept
-    {
+    void process(const ProcessContext& context) noexcept {
         convolution.process(context);
     }
 
     //==============================================================================
-    void reset() noexcept
-    {
+    void reset() noexcept {
         convolution.reset();
     }
 
-private:
+ private:
     //==============================================================================
 
     juce::dsp::Convolution convolution{juce::dsp::Convolution::Latency{ 10 }};
@@ -50,15 +48,15 @@ private:
 
 //==============================================================================
 template <typename Type>
-class AmpSimulator
-{
-public:
+class AmpSimulator {
+ public:
     //==============================================================================
     AmpSimulator() {}
 
     //==============================================================================
-    void updatePeakFilter(double sampleRate, juce::dsp::IIR::Filter<float>::CoefficientsPtr peakFilterCoeffs, float peakGainInDecibels)
-    {
+    void updatePeakFilter(double sampleRate,
+                          juce::dsp::IIR::Filter<float>::CoefficientsPtr peakFilterCoeffs,
+                          float peakGainInDecibels) {
         float peakFreq = 1550;
         float peakQ = 0.1f;
 
@@ -68,23 +66,23 @@ public:
             peakFreq,
             peakQ,
             juce::Decibels::decibelsToGain(
-                peakGainInDecibels)
-        );
+                peakGainInDecibels));
     }
 
     //==============================================================================
-    void prepare (const juce::dsp::ProcessSpec& spec)
-    {
+    void prepare(const juce::dsp::ProcessSpec& spec) {
         ampProcessorChain.prepare(spec);
         auto lowCutCoeffs = ampProcessorChain.get<AmpChainPositions::LowCutIndex>().coefficients;
-        *lowCutCoeffs = *FilterCoefs::makeFirstOrderHighPass (spec.sampleRate, 1.0f);
+        *lowCutCoeffs = *FilterCoefs::makeFirstOrderHighPass(spec.sampleRate, 1.0f);
 
         auto highCutCoeffs = ampProcessorChain.get<AmpChainPositions::HighCutIndex>().coefficients;
-        *highCutCoeffs = *FilterCoefs::makeFirstOrderLowPass (spec.sampleRate, 20000.0f);
+        *highCutCoeffs = *FilterCoefs::makeFirstOrderLowPass(spec.sampleRate, 20000.0f);
 
-        updatePeakFilter (spec.sampleRate, ampProcessorChain.get<AmpChainPositions::MidFilterIndex>().coefficients, 12.f);
+        updatePeakFilter(spec.sampleRate,
+                         ampProcessorChain.get<AmpChainPositions::MidFilterIndex>().coefficients,
+                         12.f);
 
-        ampProcessorChain.get<AmpChainPositions::inputGainIndex>().setGainDecibels (1.f);
+        ampProcessorChain.get<AmpChainPositions::inputGainIndex>().setGainDecibels(1.f);
 
         ampProcessorChain.setBypassed<AmpChainPositions::LowCutIndex>(false);
         ampProcessorChain.setBypassed<AmpChainPositions::HighCutIndex>(false);
@@ -92,29 +90,25 @@ public:
 
         auto& waveShaper = ampProcessorChain.template get<waveShaperIndex>();
 
-        waveShaper.functionToUse = [] (Type x)
-                                   {
+        waveShaper.functionToUse = [] (Type x) {
                                        return std::tanh(x);
                                    };
     }
     //==============================================================================
     template <typename ProcessContext>
-    void process (const ProcessContext& context) noexcept
-    {
+    void process(const ProcessContext& context) noexcept {
         ampProcessorChain.process(context);
     }
 
     //==============================================================================
-    void reset() noexcept
-    {
+    void reset() noexcept {
         ampProcessorChain.reset();
     }
 
 
 
     //==============================================================================
-    void setParams(ChainSettings chainSettings, double sampleRate)
-    {
+    void setParams(ChainSettings chainSettings, double sampleRate) {
         // Set gain, low pass, highpass and peak freq, update any convolution changes for cab sim
         #define INPUTRANGEMIN 0.f
         #define INPUTRANGEMAX 10.f
@@ -126,33 +120,39 @@ public:
         #define MINMIDGAIN -24.f
 
         // Set lowpass cutoff frequency
-        auto lowCutFreq = juce::jmap(chainSettings.ampLowEnd, INPUTRANGEMIN, INPUTRANGEMAX, LOWCUTFREQMAX, LOWCUTFREQMIN);
+        auto lowCutFreq = juce::jmap(chainSettings.ampLowEnd,
+                                     INPUTRANGEMIN,
+                                     INPUTRANGEMAX,
+                                     LOWCUTFREQMAX,
+                                     LOWCUTFREQMIN);
         auto lowCutCoeffs = ampProcessorChain.get<AmpChainPositions::LowCutIndex>().coefficients;
-        *lowCutCoeffs = *FilterCoefs::makeFirstOrderHighPass (sampleRate, lowCutFreq);
+        *lowCutCoeffs = *FilterCoefs::makeFirstOrderHighPass(sampleRate, lowCutFreq);
 
         // Set highpass cutoff frequency
-        auto highCutFreq =  juce::jmap(chainSettings.ampHighEnd, INPUTRANGEMIN, INPUTRANGEMAX, HIGHCUTBASEFREQ, HIGHCUTMAXFREQ);
+        auto highCutFreq =  juce::jmap(chainSettings.ampHighEnd,
+                                       INPUTRANGEMIN,
+                                       INPUTRANGEMAX,
+                                       HIGHCUTBASEFREQ,
+                                       HIGHCUTMAXFREQ);
         auto highCutCoeffs = ampProcessorChain.get<AmpChainPositions::HighCutIndex>().coefficients;
-        *highCutCoeffs = *FilterCoefs::makeFirstOrderLowPass (sampleRate, highCutFreq);
+        *highCutCoeffs = *FilterCoefs::makeFirstOrderLowPass(sampleRate, highCutFreq);
 
         // Set gain of the peak filter between -24 and 24 dbs
         auto midGain = juce::jmap(chainSettings.ampMids, INPUTRANGEMIN, INPUTRANGEMAX, MINMIDGAIN, MAXMIDGAIN);
-        updatePeakFilter (sampleRate, ampProcessorChain.get<AmpChainPositions::MidFilterIndex>().coefficients, midGain);
+        updatePeakFilter(sampleRate, ampProcessorChain.get<AmpChainPositions::MidFilterIndex>().coefficients, midGain);
 
         // Set input Gain
-        ampProcessorChain.get<AmpChainPositions::inputGainIndex>().setGainDecibels (chainSettings.ampInputGain);
+        ampProcessorChain.get<AmpChainPositions::inputGainIndex>().setGainDecibels(chainSettings.ampInputGain);
     }
 
     //==============================================================================
-    void updateFilter(float freq)
-    {
+    void updateFilter(float freq) {
         juce::ignore(freq);
     }
 
-private:
+ private:
     //==============================================================================
-    enum AmpChainPositions
-    {
+    enum AmpChainPositions {
         inputGainIndex,
         LowCutIndex,
         MidFilterIndex,
@@ -164,5 +164,12 @@ private:
     using Filter = juce::dsp::IIR::Filter<Type>;
     using FilterCoefs = juce::dsp::IIR::Coefficients<Type>;
 
-    juce::dsp::ProcessorChain<juce::dsp::Gain<Type>, Filter, Filter, Filter, juce::dsp::WaveShaper<Type, std::function<Type(Type)>>, CabSimulator<float>> ampProcessorChain;
+    juce::dsp::ProcessorChain<juce::dsp::Gain<Type>,
+                              Filter,
+                              Filter,
+                              Filter,
+                              juce::dsp::WaveShaper<Type, std::function<Type(Type)>>,
+                              CabSimulator<float>> ampProcessorChain;
 };
+
+#endif  // MODULES_AMPSIMCLASS_H_

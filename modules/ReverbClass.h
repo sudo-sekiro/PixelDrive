@@ -1,36 +1,33 @@
+#ifndef MODULES_REVERBCLASS_H_
+#define MODULES_REVERBCLASS_H_
+
 //==============================================================================
 template <typename Type>
-class Reverb
-{
-public:
+class Reverb {
+ public:
     //==============================================================================
     Reverb()
     {}
 
     //==============================================================================
-    void prepare (const juce::dsp::ProcessSpec& spec)
-    {
-        reverb.prepare (spec);
+    void prepare(const juce::dsp::ProcessSpec& spec) {
+        reverb.prepare(spec);
     }
 
     //==============================================================================
     template <typename ProcessContext>
-    void process (const ProcessContext& context) noexcept
-    {
-        reverb.process (context);
+    void process(const ProcessContext& context) noexcept {
+        reverb.process(context);
     }
 
     //==============================================================================
-    void reset() noexcept
-    {
-        reverb.reset ();
+    void reset() noexcept {
+        reverb.reset();
     }
 
     //==============================================================================
-    void setParams(ChainSettings chainSettings)
-    {
+    void setParams(ChainSettings chainSettings) {
         // Set reverb parameters
-        //auto tone = chainSettings.distortionTone;
 
         juce::Reverb::Parameters newParams;
 
@@ -42,10 +39,12 @@ public:
 
         newParams.freezeMode = chainSettings.reverbShimmer ? 1.f : 0.f;
 
-        reverb.setParameters (newParams);
+        reverb.setParameters(newParams);
     }
 
-private:
+ private:
     //==============================================================================
     juce::dsp::Reverb reverb;
 };
+
+#endif  // MODULES_REVERBCLASS_H_
