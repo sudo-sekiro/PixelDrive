@@ -15,20 +15,19 @@
 #include "modules/DistortionClass.h"
 
 //==============================================================================
-class PixelDriveAudioProcessor  : public juce::AudioProcessor
-{
-public:
+class PixelDriveAudioProcessor  : public juce::AudioProcessor {
+ public:
     //==============================================================================
     PixelDriveAudioProcessor();
     ~PixelDriveAudioProcessor() override;
 
     //==============================================================================
-    void prepareToPlay (double sampleRate, int samplesPerBlock) override;
+    void prepareToPlay(double sampleRate, int samplesPerBlock) override;
     void releaseResources() override;
 
-    bool isBusesLayoutSupported (const BusesLayout& layouts) const override;
+    bool isBusesLayoutSupported(const BusesLayout& layouts) const override;
 
-    void processBlock (juce::AudioBuffer<float>&, juce::MidiBuffer&) override;
+    void processBlock(juce::AudioBuffer<float>&, juce::MidiBuffer&) override;
     using AudioProcessor::processBlock;
 
     //==============================================================================
@@ -46,13 +45,13 @@ public:
     //==============================================================================
     int getNumPrograms() override;
     int getCurrentProgram() override;
-    void setCurrentProgram (int index) override;
-    const juce::String getProgramName (int index) override;
-    void changeProgramName (int index, const juce::String& newName) override;
+    void setCurrentProgram(int index) override;
+    const juce::String getProgramName(int index) override;
+    void changeProgramName(int index, const juce::String& newName) override;
 
     //==============================================================================
-    void getStateInformation (juce::MemoryBlock& destData) override;
-    void setStateInformation (const void* data, int sizeInBytes) override;
+    void getStateInformation(juce::MemoryBlock& destData) override;
+    void setStateInformation(const void* data, int sizeInBytes) override;
 
     static juce::AudioProcessorValueTreeState::ParameterLayout
         createParameterLayout();
@@ -61,12 +60,12 @@ public:
                                               createParameterLayout()};
 
     void updateParameters();
-private:
-    //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PixelDriveAudioProcessor)
 
-    enum ChainPositions
-    {
+ private:
+    //==============================================================================
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PixelDriveAudioProcessor);
+
+    enum ChainPositions {
         preGainIndex,
         distortionIndex,
         ampSimIndex,
@@ -78,7 +77,9 @@ private:
     using Filter = juce::dsp::IIR::Filter<float>;
     using FilterCoefs = juce::dsp::IIR::Coefficients<float>;
 
-    using MonoChain = juce::dsp::ProcessorChain<juce::dsp::Gain<float>, Distortion<float>, AmpSimulator<float>, Delay<float, 1>, Reverb<float>, juce::dsp::ProcessorDuplicator<Filter, FilterCoefs>>;
+    using MonoChain = juce::dsp::ProcessorChain<juce::dsp::Gain<float>, Distortion<float>, AmpSimulator<float>,
+                                                Delay<float, 1>, Reverb<float>,
+                                                juce::dsp::ProcessorDuplicator<Filter, FilterCoefs>>;
 
     MonoChain leftChain, rightChain;
 };

@@ -1,6 +1,8 @@
 // Add parameters
-struct ChainSettings
-{
+
+#ifndef CHAINSETTINGS_H_
+#define CHAINSETTINGS_H_
+struct ChainSettings {
     float preGain {0.f};
     float distortionTone {1.f}, distortionPreGain {50.f}, distortionPostGain {0.f}, distortionClarity {1000.f};
     bool distortionBypass {false};
@@ -14,3 +16,5 @@ struct ChainSettings
 };
 
 ChainSettings getChainSettings(juce::AudioProcessorValueTreeState& apvts);
+
+#endif  // CHAINSETTINGS_H_

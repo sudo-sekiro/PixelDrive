@@ -1,23 +1,21 @@
+#include <memory>
+
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 #include "ClampOutput.h"
 
 //==============================================================================
 PixelDriveAudioProcessor::PixelDriveAudioProcessor()
-     : AudioProcessor (BusesProperties()
-                     #if ! JucePlugin_IsMidiEffect
-                      #if ! JucePlugin_IsSynth
-                       .withInput  ("Input",  juce::AudioChannelSet::stereo(), true)
+     : AudioProcessor(BusesProperties()
+                     #if !JucePlugin_IsMidiEffect
+                      #if !JucePlugin_IsSynth
+                       .withInput("Input",  juce::AudioChannelSet::stereo(), true)
                       #endif
-                       .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
+                       .withOutput("Output", juce::AudioChannelSet::stereo(), true)
                      #endif
-                       )
-{
-}
+                       ) {}
 
-PixelDriveAudioProcessor::~PixelDriveAudioProcessor()
-{
-}
+PixelDriveAudioProcessor::~PixelDriveAudioProcessor() {}
 
 //==============================================================================
 const juce::String PixelDriveAudioProcessor::getName() const
@@ -25,68 +23,58 @@ const juce::String PixelDriveAudioProcessor::getName() const
     return JucePlugin_Name;
 }
 
-bool PixelDriveAudioProcessor::acceptsMidi() const
-{
-   #if JucePlugin_WantsMidiInput
-    return true;
-   #else
-    return false;
-   #endif
+bool PixelDriveAudioProcessor::acceptsMidi() const {
+    #if JucePlugin_WantsMidiInput
+        return true;
+    #else
+        return false;
+    #endif
 }
 
-bool PixelDriveAudioProcessor::producesMidi() const
-{
-   #if JucePlugin_ProducesMidiOutput
-    return true;
-   #else
-    return false;
-   #endif
+bool PixelDriveAudioProcessor::producesMidi() const {
+    #if JucePlugin_ProducesMidiOutput
+        return true;
+    #else
+        return false;
+    #endif
 }
 
-bool PixelDriveAudioProcessor::isMidiEffect() const
-{
-   #if JucePlugin_IsMidiEffect
-    return true;
-   #else
-    return false;
-   #endif
+bool PixelDriveAudioProcessor::isMidiEffect() const {
+    #if JucePlugin_IsMidiEffect
+        return true;
+    #else
+        return false;
+    #endif
 }
 
-double PixelDriveAudioProcessor::getTailLengthSeconds() const
-{
+double PixelDriveAudioProcessor::getTailLengthSeconds() const {
     return 0.0;
 }
 
-int PixelDriveAudioProcessor::getNumPrograms()
-{
+int PixelDriveAudioProcessor::getNumPrograms() {
     return 1;   // NB: some hosts don't cope very well if you tell them there are 0 programs,
                 // so this should be at least 1, even if you're not really implementing programs.
 }
 
-int PixelDriveAudioProcessor::getCurrentProgram()
-{
+int PixelDriveAudioProcessor::getCurrentProgram() {
     return 0;
 }
 
-void PixelDriveAudioProcessor::setCurrentProgram (int index)
-{
-    juce::ignoreUnused (index);
+void PixelDriveAudioProcessor::setCurrentProgram(int index) {
+    juce::ignoreUnused(index);
 }
 
-const juce::String PixelDriveAudioProcessor::getProgramName (int index)
-{
-    juce::ignoreUnused (index);
+const juce::String PixelDriveAudioProcessor::getProgramName(int index) {
+    juce::ignoreUnused(index);
     return {};
 }
 
-void PixelDriveAudioProcessor::changeProgramName (int index, const juce::String& newName)
-{
-    juce::ignoreUnused (index, newName);
+void PixelDriveAudioProcessor::changeProgramName(int index, const juce::String& newName) {
+    juce::ignoreUnused(index, newName);
 }
 
 //==============================================================================
-void PixelDriveAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
-{
+void PixelDriveAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock) {
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
 
@@ -98,10 +86,10 @@ void PixelDriveAudioProcessor::prepareToPlay (double sampleRate, int samplesPerB
     spec.sampleRate = sampleRate;
 
     auto& leftnoiseGate = leftChain.get<ChainPositions::noiseGateIndex>();
-    leftnoiseGate.state = FilterCoefs::makeFirstOrderLowPass (spec.sampleRate, 10000.0f);
+    leftnoiseGate.state = FilterCoefs::makeFirstOrderLowPass(spec.sampleRate, 10000.0f);
 
     auto& rightNoiseGate = rightChain.get<ChainPositions::noiseGateIndex>();
-    rightNoiseGate.state = FilterCoefs::makeFirstOrderLowPass (spec.sampleRate, 10000.0f);
+    rightNoiseGate.state = FilterCoefs::makeFirstOrderLowPass(spec.sampleRate, 10000.0f);
 
     leftChain.prepare(spec);
     rightChain.prepare(spec);
@@ -112,8 +100,8 @@ void PixelDriveAudioProcessor::prepareToPlay (double sampleRate, int samplesPerB
 
     auto chainSettings = getChainSettings(apvts);
 
-    leftPreGain.setGainDecibels (chainSettings.preGain);
-    rightPreGain.setGainDecibels (chainSettings.preGain);
+    leftPreGain.setGainDecibels(chainSettings.preGain);
+    rightPreGain.setGainDecibels(chainSettings.preGain);
 
     updateParameters();
 }
@@ -124,34 +112,32 @@ void PixelDriveAudioProcessor::releaseResources()
     // spare memory, etc.
 }
 
-bool PixelDriveAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
-{
-  #if JucePlugin_IsMidiEffect
-    juce::ignoreUnused (layouts);
-    return true;
-  #else
-    // This is the place where you check if the layout is supported.
-    // In this template code we only support mono or stereo.
-    // Some plugin hosts, such as certain GarageBand versions, will only
-    // load plugins that support stereo bus layouts.
-    if (layouts.getMainOutputChannelSet() != juce::AudioChannelSet::mono()
-     && layouts.getMainOutputChannelSet() != juce::AudioChannelSet::stereo())
-        return false;
+bool PixelDriveAudioProcessor::isBusesLayoutSupported(const BusesLayout& layouts) const {
+    #if JucePlugin_IsMidiEffect
+        juce::ignoreUnused(layouts);
+        return true;
+    #else
+        // This is the place where you check if the layout is supported.
+        // In this template code we only support mono or stereo.
+        // Some plugin hosts, such as certain GarageBand versions, will only
+        // load plugins that support stereo bus layouts.
+        if (layouts.getMainOutputChannelSet() != juce::AudioChannelSet::mono()
+        && layouts.getMainOutputChannelSet() != juce::AudioChannelSet::stereo())
+            return false;
 
-    // This checks if the input layout matches the output layout
-   #if ! JucePlugin_IsSynth
-    if (layouts.getMainOutputChannelSet() != layouts.getMainInputChannelSet())
-        return false;
-   #endif
+        // This checks if the input layout matches the output layout
+        #if !JucePlugin_IsSynth
+            if (layouts.getMainOutputChannelSet() != layouts.getMainInputChannelSet())
+                return false;
+        #endif
 
-    return true;
-  #endif
+        return true;
+    #endif
 }
 
-void PixelDriveAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
-                                              juce::MidiBuffer& midiMessages)
-{
-    juce::ignoreUnused (midiMessages);
+void PixelDriveAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer,
+                                            juce::MidiBuffer& midiMessages) {
+    juce::ignoreUnused(midiMessages);
 
     juce::ScopedNoDenormals noDenormals;
     auto totalNumInputChannels  = getTotalNumInputChannels();
@@ -164,7 +150,7 @@ void PixelDriveAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     // when they first compile a plugin, but obviously you don't need to keep
     // this code if your algorithm always overwrites all the output channels.
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
-        buffer.clear (i, 0, buffer.getNumSamples());
+        buffer.clear(i, 0, buffer.getNumSamples());
 
     // This is the place where you'd normally do the guts of your plugin's
     // audio processing...
@@ -195,36 +181,31 @@ void PixelDriveAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 }
 
 //==============================================================================
-bool PixelDriveAudioProcessor::hasEditor() const
-{
-    return true; // (change this to false if you choose to not supply an editor)
+bool PixelDriveAudioProcessor::hasEditor() const {
+    return true;  // (change this to false if you choose to not supply an editor)
 }
 
-juce::AudioProcessorEditor* PixelDriveAudioProcessor::createEditor()
-{
+juce::AudioProcessorEditor* PixelDriveAudioProcessor::createEditor() {
     return new PixelDriveAudioProcessorEditor (*this);
     // return new juce::GenericAudioProcessorEditor (*this);
 }
 
 //==============================================================================
-void PixelDriveAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
-{
+void PixelDriveAudioProcessor::getStateInformation(juce::MemoryBlock& destData) {
     // You should use this method to store your parameters in the memory block.
     // You could do that either as raw data, or use the XML or ValueTree classes
     // as intermediaries to make it easy to save and load complex data.
-    juce::ignoreUnused (destData);
+    juce::ignoreUnused(destData);
 }
 
-void PixelDriveAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
-{
+void PixelDriveAudioProcessor::setStateInformation(const void* data, int sizeInBytes) {
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
-    juce::ignoreUnused (data, sizeInBytes);
+    juce::ignoreUnused(data, sizeInBytes);
 }
 
 // Add parameter
-ChainSettings getChainSettings(juce::AudioProcessorValueTreeState& apvts)
-{
+ChainSettings getChainSettings(juce::AudioProcessorValueTreeState& apvts) {
     ChainSettings settings;
 
     settings.preGain = apvts.getRawParameterValue("preGain")->load();
@@ -264,11 +245,10 @@ ChainSettings getChainSettings(juce::AudioProcessorValueTreeState& apvts)
 
 // Add parameters
 juce::AudioProcessorValueTreeState::ParameterLayout
-    PixelDriveAudioProcessor::createParameterLayout()
-    {
+    PixelDriveAudioProcessor::createParameterLayout() {
         juce::AudioProcessorValueTreeState::ParameterLayout layout;
 
-        layout.add(std::make_unique<juce::AudioParameterFloat>("preGain","preGain",
+        layout.add(std::make_unique<juce::AudioParameterFloat>("preGain", "preGain",
                                     juce::NormalisableRange<float>(-24.f, 24.f, 0.5f, 1.f),
                                     0.0f));
         /* Distortion parameters
@@ -278,16 +258,16 @@ juce::AudioProcessorValueTreeState::ParameterLayout
          * distortionClarity: Highpass filter cut off frequency to control low harmonics
          * distortionBypass: Bypass distortion effect
          */
-        layout.add(std::make_unique<juce::AudioParameterFloat>("distortionPreGain","distortionPreGain",
+        layout.add(std::make_unique<juce::AudioParameterFloat>("distortionPreGain", "distortionPreGain",
                                     juce::NormalisableRange<float>(-10.f, 100.f, 0.5f, 1.f),
                                     50.0f));
-        layout.add(std::make_unique<juce::AudioParameterFloat>("distortionTone","distortionTone",
+        layout.add(std::make_unique<juce::AudioParameterFloat>("distortionTone", "distortionTone",
                                     juce::NormalisableRange<float>(0.01f, 100.f, 0.5f, 1.f),
                                     5.0f));
-        layout.add(std::make_unique<juce::AudioParameterFloat>("distortionPostGain","distortionPostGain",
+        layout.add(std::make_unique<juce::AudioParameterFloat>("distortionPostGain", "distortionPostGain",
                                     juce::NormalisableRange<float>(-24.f, 24.f, 0.5f, 1.f),
                                     0.0f));
-        layout.add(std::make_unique<juce::AudioParameterFloat>("distortionClarity","distortionClarity",
+        layout.add(std::make_unique<juce::AudioParameterFloat>("distortionClarity", "distortionClarity",
                                     juce::NormalisableRange<float>(0.f, 5000.f, 0.5f, 1.f),
                                     1000.0f));
         layout.add(std::make_unique<juce::AudioParameterBool>("distortionBypass", "distortionBypass", false));
@@ -299,16 +279,16 @@ juce::AudioProcessorValueTreeState::ParameterLayout
          * ampHighEnd: Low values attenuate high frequencies.
          * ampBypass: Bypass amp simulator
          */
-        layout.add(std::make_unique<juce::AudioParameterFloat>("ampInputGain","ampInputGain",
+        layout.add(std::make_unique<juce::AudioParameterFloat>("ampInputGain", "ampInputGain",
                                     juce::NormalisableRange<float>(0.f, 11.f, 0.1f, 1.f),
                                     1.0f));
-        layout.add(std::make_unique<juce::AudioParameterFloat>("ampLowEnd","ampLowEnd",
+        layout.add(std::make_unique<juce::AudioParameterFloat>("ampLowEnd", "ampLowEnd",
                                     juce::NormalisableRange<float>(0.f, 10.f, 0.1f, 1.f),
                                     10.0f));
-        layout.add(std::make_unique<juce::AudioParameterFloat>("ampMids","ampMids",
+        layout.add(std::make_unique<juce::AudioParameterFloat>("ampMids", "ampMids",
                                     juce::NormalisableRange<float>(0.f, 10.f, 0.1f, 1.f),
                                     5.0f));
-        layout.add(std::make_unique<juce::AudioParameterFloat>("ampHighEnd","ampHighEnd",
+        layout.add(std::make_unique<juce::AudioParameterFloat>("ampHighEnd", "ampHighEnd",
                                     juce::NormalisableRange<float>(0.f, 10.f, 0.1f, 1.f),
                                     10.0f));
         layout.add(std::make_unique<juce::AudioParameterBool>("ampBypass", "ampBypass", false));
@@ -319,13 +299,13 @@ juce::AudioProcessorValueTreeState::ParameterLayout
          * delayFeedback: Controls the decay time of the wet signal
          * delayBypass: Bypass the delay effect
          */
-        layout.add(std::make_unique<juce::AudioParameterFloat>("delayTime","delayTime",
+        layout.add(std::make_unique<juce::AudioParameterFloat>("delayTime", "delayTime",
                                     juce::NormalisableRange<float>(0.f, MAX_DELAY_TIME, (MAX_DELAY_TIME / 10), 1.f),
                                     0.2f));
-        layout.add(std::make_unique<juce::AudioParameterFloat>("delayWetLevel","delayWetLevel",
+        layout.add(std::make_unique<juce::AudioParameterFloat>("delayWetLevel", "delayWetLevel",
                                     juce::NormalisableRange<float>(0.f, 1.f, 0.1f, 1.f),
                                     0.4f));
-        layout.add(std::make_unique<juce::AudioParameterFloat>("delayFeedback","delayFeedback",
+        layout.add(std::make_unique<juce::AudioParameterFloat>("delayFeedback", "delayFeedback",
                                     juce::NormalisableRange<float>(0.f, 1.f, 0.1f, 1.f),
                                     0.1f));
         layout.add(std::make_unique<juce::AudioParameterBool>("delayBypass", "delayBypass", false));
@@ -338,22 +318,22 @@ juce::AudioProcessorValueTreeState::ParameterLayout
          * reverbShimmer: Enable feedback mode.
          * reverbBypass: bypass the reverb effect
          */
-        layout.add(std::make_unique<juce::AudioParameterFloat>("reverbIntensity","reverbIntensity",
+        layout.add(std::make_unique<juce::AudioParameterFloat>("reverbIntensity", "reverbIntensity",
                                     juce::NormalisableRange<float>(0.f, 1.f, 0.1f, 1.f),
                                     0.5f));
-        layout.add(std::make_unique<juce::AudioParameterFloat>("reverbRoomSize","reverbRoomSize",
+        layout.add(std::make_unique<juce::AudioParameterFloat>("reverbRoomSize", "reverbRoomSize",
                                     juce::NormalisableRange<float>(0.f, 1.f, 0.1f, 1.f),
                                     0.5f));
-        layout.add(std::make_unique<juce::AudioParameterFloat>("reverbWetMix","reverbWetMix",
+        layout.add(std::make_unique<juce::AudioParameterFloat>("reverbWetMix", "reverbWetMix",
                                     juce::NormalisableRange<float>(0.f, 1.f, 0.1f, 1.f),
                                     0.33f));
-        layout.add(std::make_unique<juce::AudioParameterFloat>("reverbSpread","reverbSpread",
+        layout.add(std::make_unique<juce::AudioParameterFloat>("reverbSpread", "reverbSpread",
                                     juce::NormalisableRange<float>(0.f, 1.f, 0.1f, 1.f),
                                     1.f));
         layout.add(std::make_unique<juce::AudioParameterBool>("reverbShimmer", "reverbShimmer", true));
         layout.add(std::make_unique<juce::AudioParameterBool>("reverbBypass", "reverbBypass", false));
 
-        layout.add(std::make_unique<juce::AudioParameterFloat>("noiseGate","noiseGate",
+        layout.add(std::make_unique<juce::AudioParameterFloat>("noiseGate", "noiseGate",
                                     juce::NormalisableRange<float>(10000.f, 20000.f, 0.5f, 1.f),
                                     17500.0f));
 
@@ -361,15 +341,14 @@ juce::AudioProcessorValueTreeState::ParameterLayout
         return layout;
     }
 
-void PixelDriveAudioProcessor::updateParameters()
-{
+void PixelDriveAudioProcessor::updateParameters() {
     auto chainSettings = getChainSettings(apvts);
 
     auto& leftPreGain = leftChain.template get<ChainPositions::preGainIndex>();
     auto& rightPreGain = rightChain.template get<ChainPositions::preGainIndex>();
 
-    leftPreGain.setGainDecibels (chainSettings.preGain);
-    rightPreGain.setGainDecibels (chainSettings.preGain);
+    leftPreGain.setGainDecibels(chainSettings.preGain);
+    rightPreGain.setGainDecibels(chainSettings.preGain);
 
     auto& leftDistortion = leftChain.template get<ChainPositions::distortionIndex>();
     auto& rightDistortion = rightChain.template get<ChainPositions::distortionIndex>();
@@ -410,13 +389,12 @@ void PixelDriveAudioProcessor::updateParameters()
     auto& leftNoiseGate = leftChain.template get<ChainPositions::noiseGateIndex>();
     auto& rightNoiseGate = rightChain.template get<ChainPositions::noiseGateIndex>();
 
-    leftNoiseGate.state = FilterCoefs::makeFirstOrderLowPass (getSampleRate(), chainSettings.noiseGate);
-    rightNoiseGate.state = FilterCoefs::makeFirstOrderLowPass (getSampleRate(), chainSettings.noiseGate);
+    leftNoiseGate.state = FilterCoefs::makeFirstOrderLowPass(getSampleRate(), chainSettings.noiseGate);
+    rightNoiseGate.state = FilterCoefs::makeFirstOrderLowPass(getSampleRate(), chainSettings.noiseGate);
 }
 
 //==============================================================================
 // This creates new instances of the plugin..
-juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
-{
+juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter() {
     return new PixelDriveAudioProcessor();
 }
