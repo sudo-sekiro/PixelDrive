@@ -1,11 +1,13 @@
+#include <vector>
+
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 #include "UserInterface/CustomSlider.cpp"
 #include "UserInterface/CustomToggle.cpp"
 
 //==============================================================================
-PixelDriveAudioProcessorEditor::PixelDriveAudioProcessorEditor (PixelDriveAudioProcessor& p)
-    : AudioProcessorEditor (&p), processorRef (p),
+PixelDriveAudioProcessorEditor::PixelDriveAudioProcessorEditor(PixelDriveAudioProcessor& p)
+    : AudioProcessorEditor(&p), processorRef(p),
     preGainSliderAttachment(p.apvts, "preGain", preGainSlider),
     // Distortion attachments
     distortionPreGainSliderAttachment(p.apvts, "distortionPreGain", distortionPreGainSlider),
@@ -33,46 +35,40 @@ PixelDriveAudioProcessorEditor::PixelDriveAudioProcessorEditor (PixelDriveAudioP
     reverbShimmerButtonAttachment(p.apvts, "reverbShimmer", reverbShimmerButton),
     noiseGateSliderAttachment(p.apvts, "noiseGate", noiseGateSlider)
 {
-    juce::ignoreUnused (processorRef);
+    juce::ignoreUnused(processorRef);
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
 
     addLabels();
 
-    for (auto* comp : getComps())
-    {
+    for (auto* comp : getComps()) {
         addAndMakeVisible(comp);
     }
 
     const auto& params = processorRef.getParameters();
-    for ( auto param : params )
-    {
+    for ( auto param : params ) {
         param->addListener(this);
     }
 
     startTimerHz(60);
 
-    setSize (900, 600);
+    setSize(900, 600);
 }
 
-PixelDriveAudioProcessorEditor::~PixelDriveAudioProcessorEditor()
-{
+PixelDriveAudioProcessorEditor::~PixelDriveAudioProcessorEditor() {
     const auto& params = processorRef.getParameters();
-    for ( auto param : params )
-    {
+    for ( auto param : params ) {
         param->removeListener(this);
     }
 }
 
 //==============================================================================
-void PixelDriveAudioProcessorEditor::paint (juce::Graphics& g)
-{
+void PixelDriveAudioProcessorEditor::paint(juce::Graphics& g) {
     // (Our component is opaque, so we must completely fill the background with a solid colour)
-    g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));
+    g.fillAll(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
 }
 
-void PixelDriveAudioProcessorEditor::resized()
-{
+void PixelDriveAudioProcessorEditor::resized() {
     auto bounds = getLocalBounds();
 
     auto topBar = bounds.removeFromTop(bounds.getHeight() / 6);
@@ -124,35 +120,31 @@ void PixelDriveAudioProcessorEditor::resized()
     reverbBypassButton.setBounds(bounds);
 }
 
-void PixelDriveAudioProcessorEditor::parameterValueChanged(int parameterIndex, float newValue)
-{
+void PixelDriveAudioProcessorEditor::parameterValueChanged(int parameterIndex, float newValue) {
     juce::ignoreUnused(parameterIndex, newValue);
     parametersChanged.set(true);
 }
 
-void PixelDriveAudioProcessorEditor::timerCallback()
-{
-    if( parametersChanged.compareAndSetBool(false, true) )
-    {
+void PixelDriveAudioProcessorEditor::timerCallback() {
+    if (parametersChanged.compareAndSetBool(false, true)) {
         processorRef.updateParameters();
     }
 }
 
-std::vector<juce::Component*> PixelDriveAudioProcessorEditor::getComps()
-{
-    return
-    {
+std::vector<juce::Component*> PixelDriveAudioProcessorEditor::getComps() {
+    return {
         &preGainSlider,
-        &distortionPreGainSlider, &distortionToneSlider, &distortionPostGainSlider, &distortionClaritySlider, &distortionBypassButton,
+        &distortionPreGainSlider, &distortionToneSlider, &distortionPostGainSlider, &distortionClaritySlider,
+        &distortionBypassButton,
         &ampInputGainSlider, &ampLowEndSlider, &ampMidsSlider, &ampHighEndSlider, &ampBypassButton,
         &delayTimeSlider, &delayWetLevelSlider, &delayFeedbackSlider, &delayBypassButton,
-        &reverbIntensitySlider, &reverbShimmerButton, &reverbRoomSizeSlider, &reverbWetMixSlider, &reverbSpreadSlider, &reverbBypassButton,
+        &reverbIntensitySlider, &reverbShimmerButton, &reverbRoomSizeSlider, &reverbWetMixSlider, &reverbSpreadSlider,
+        &reverbBypassButton,
         &noiseGateSlider
     };
 }
 
-void PixelDriveAudioProcessorEditor::addLabels()
-{
+void PixelDriveAudioProcessorEditor::addLabels() {
     /* Add label, max and min values */
     // Pregain
     preGainSlider.addSliderLabels("-24dB", "24dB", "Pregain");
@@ -169,20 +161,17 @@ void PixelDriveAudioProcessorEditor::addLabels()
     ampLowEndSlider.addSliderLabels("0", "11", "Bass");
     ampMidsSlider.addSliderLabels("0", "11", "Mids");
     ampHighEndSlider.addSliderLabels("0", "11", "Treble");
-    //ampBypassButton,
 
     // Delay labels
     delayTimeSlider.addSliderLabels("0", ((juce::String)MAX_DELAY_TIME), "Time");
     delayWetLevelSlider.addSliderLabels("0", "10", "Wet Mix");
     delayFeedbackSlider.addSliderLabels("0", "10", "Feedback");
-    // delayBypassButton,
 
     // Reverb labels
     reverbIntensitySlider.addSliderLabels("0", "10", "Intensity");
     reverbRoomSizeSlider.addSliderLabels("0", "10", "Room Size");
     reverbWetMixSlider.addSliderLabels("0", "10", "Wet Mix");
     reverbSpreadSlider.addSliderLabels("0", "10", "Spread");
-    // reverbShimmerButton, reverbBypassButton
 
     // Noise Gate
     noiseGateSlider.addSliderLabels("10000", "20000", "Noise Gate");
