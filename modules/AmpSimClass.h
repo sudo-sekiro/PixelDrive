@@ -7,17 +7,13 @@ class CabSimulator {
  public:
     //==============================================================================
     CabSimulator() {
-        auto dir = juce::File::getCurrentWorkingDirectory();
+        /* Assume thrash_amp.wav has been added as binary data in CMakeLists.txt with `juce_add_binary_data()`
+         * Also assume BinaryData.h has been included */
+        const char* ampConvolutionData = BinaryData::thrash_amp_wav;
+        const int ampConvolutionDataSize = BinaryData::thrash_amp_wavSize;
 
-        int numTries = 0;
-
-        while (!dir.getChildFile("Resources").exists() && numTries++ < 15)
-            dir = dir.getParentDirectory();
-
-        auto impulseFile = dir.getChildFile("Resources").getChildFile("thrash_amp.wav");  // ("guitar_amp.wav");
-        assert(impulseFile.existsAsFile());
-
-        convolution.loadImpulseResponse(impulseFile,
+        convolution.loadImpulseResponse(ampConvolutionData,
+                                        ampConvolutionDataSize,
                                         juce::dsp::Convolution::Stereo::no,
                                         juce::dsp::Convolution::Trim::no,
                                         1024,

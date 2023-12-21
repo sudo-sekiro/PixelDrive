@@ -63,7 +63,7 @@ juce_add_plugin(PixelDrivePlugin
 # include all your JUCE module headers; if you're happy to include module headers directly, you
 # probably don't need to call this.
 
-# juce_generate_juce_header(PixelDrivePlugin)
+juce_generate_juce_header(PixelDrivePlugin)
 
 # `target_sources` adds source files to a target. We pass the target that needs the sources as the
 # first argument, then a visibility parameter for the sources which should normally be PRIVATE.
@@ -97,7 +97,9 @@ target_compile_definitions(PixelDrivePlugin
 # static library. These source files can be of any kind (wav data, images, fonts, icons etc.).
 # Conversion to binary-data will happen when your target is built.
 
-# juce_add_binary_data(PixelDrivePlugin SOURCES ...)
+# Binary assets to include
+juce_add_binary_data(PixelDrivePluginData SOURCES
+    Resources/thrash_amp.wav)
 
 # `target_link_libraries` links libraries and JUCE modules to other libraries or executables. Here,
 # we're linking our executable target to the `juce::juce_audio_utils` module. Inter-module
@@ -107,7 +109,7 @@ target_compile_definitions(PixelDrivePlugin
 
 target_link_libraries(PixelDrivePlugin
     PRIVATE
-        # PixelDrivePlugin           # If we'd created a binary data target, we'd link to it here
+        PixelDrivePluginData           # Link binary data target
         juce::juce_audio_utils
         juce::juce_dsp
     PUBLIC
