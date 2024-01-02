@@ -18,7 +18,15 @@ This can be downloaded from: https://www.steinberg.net/en/company/developers.htm
 ### Run Cmake:
 ```
 cmake -Bbuild (-GgeneratorName) (-DJUCE_BUILD_EXTRAS=ON)
-cmake --build build --config Debug --target PixelDriveExample_Standalone
+
+# For 64 bit builds
+cmake -Bbuild -DCMAKE_GENERATOR_PLATFORM=x64 -A x64 -G "Visual Studio 16 2019"
+
+# To build the debug version of the standalone application
+cmake --build build --config Debug --target PixelDrivePlugin_Standalone
+
+# To build the release version of the VST3 application
+cmake --build build --config Release --target PixelDrivePlugin_VST3
 ```
 
 This guide allows for building the JUCE application without Visual Studio or Projucer.
