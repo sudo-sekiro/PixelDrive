@@ -1,6 +1,6 @@
 #include "UserInterface/CustomToggle.h"
 
-void LookAndFeel::drawToggleButton(juce::Graphics& g,
+void CustomLookAndFeel::drawToggleButton(juce::Graphics& g,
                                    juce::ToggleButton& toggleButton,
                                    bool shouldDrawButtonAsHighlighted,
                                    bool shouldDrawButtonAsDown) {

@@ -19,7 +19,7 @@ struct CustomToggleButton : juce::ToggleButton {
     int getTextHeight() const {return 14; }
     // juce::String label;
  private:
-    LookAndFeel lnf;
+    CustomLookAndFeel lnf;
 };
 
 #endif  // USERINTERFACE_CUSTOMTOGGLE_H_

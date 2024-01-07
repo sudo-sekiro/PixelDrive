@@ -24,7 +24,7 @@ struct CustomRotarySlider : juce::Slider {
     juce::String getDisplayString() const;
     void addSliderLabels(juce::String minLabel, juce::String maxLabel, juce::String titleLabel);
  private:
-    LookAndFeel lnf;
+    CustomLookAndFeel lnf;
 };
 
 #endif  // USERINTERFACE_CUSTOMSLIDER_H_

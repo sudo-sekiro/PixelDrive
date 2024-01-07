@@ -1,6 +1,6 @@
 #include "UserInterface/CustomSlider.h"
 
-void LookAndFeel::drawRotarySlider(juce::Graphics &g,
+void CustomLookAndFeel::drawRotarySlider(juce::Graphics &g,
                                    int x,
                                    int y,
                                    int width,
