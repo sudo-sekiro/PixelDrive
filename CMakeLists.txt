@@ -72,8 +72,9 @@ juce_generate_juce_header(PixelDrivePlugin)
 
 target_sources(PixelDrivePlugin
     PRIVATE
-        PluginEditor.cpp
-        PluginProcessor.cpp)
+        "PluginEditor.cpp"
+        "Service/PresetManager.cpp"
+        "PluginProcessor.cpp")
 
 # `target_compile_definitions` adds some preprocessor definitions to our target. In a Projucer
 # project, these might be passed in the 'Preprocessor Definitions' field. JUCE modules also make use
