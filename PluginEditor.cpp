@@ -33,7 +33,9 @@ PixelDriveAudioProcessorEditor::PixelDriveAudioProcessorEditor(PixelDriveAudioPr
     reverbSpreadSliderAttachment(p.apvts, "reverbSpread", reverbSpreadSlider),
     reverbBypassButtonAttachment(p.apvts, "reverbBypass", reverbBypassButton),
     reverbShimmerButtonAttachment(p.apvts, "reverbShimmer", reverbShimmerButton),
-    noiseGateSliderAttachment(p.apvts, "noiseGate", noiseGateSlider)
+    noiseGateSliderAttachment(p.apvts, "noiseGate", noiseGateSlider),
+    // Preset panel
+    presetPanel(p.getPresetManager())
 {
     juce::ignoreUnused(processorRef);
     // Make sure that before the constructor has finished, you've set the
@@ -49,6 +51,8 @@ PixelDriveAudioProcessorEditor::PixelDriveAudioProcessorEditor(PixelDriveAudioPr
     for ( auto param : params ) {
         param->addListener(this);
     }
+
+    addAndMakeVisible(presetPanel);
 
     startTimerHz(60);
 
@@ -72,7 +76,8 @@ void PixelDriveAudioProcessorEditor::resized() {
     auto bounds = getLocalBounds();
 
     auto topBar = bounds.removeFromTop(bounds.getHeight() / 6);
-    preGainSlider.setBounds(topBar.removeFromLeft(topBar.getWidth() / 2));
+    preGainSlider.setBounds(topBar.removeFromLeft(topBar.getWidth() * 1 / 4));
+    presetPanel.setBounds(topBar.removeFromLeft(topBar.getWidth() * 2 / 3));
     noiseGateSlider.setBounds(topBar);
 
     bounds.reduce(bounds.getWidth() / 25, bounds.getHeight() / 25);

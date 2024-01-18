@@ -1,5 +1,7 @@
 #include <memory>
 
+#include <JuceHeader.h>
+
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 #include "ClampOutput.h"
@@ -13,7 +15,12 @@ PixelDriveAudioProcessor::PixelDriveAudioProcessor()
                       #endif
                        .withOutput("Output", juce::AudioChannelSet::stereo(), true)
                      #endif
-                       ) {}
+                     ),
+                    apvts(*this, nullptr, ProjectInfo::projectName, PixelDriveAudioProcessor::createParameterLayout()) {
+                        apvts.state.setProperty(Service::PresetManager::presetNameProperty, "", nullptr);
+                        apvts.state.setProperty("version", ProjectInfo::versionNumber, nullptr);
+                        presetManager = std::make_unique<Service::PresetManager>(apvts);
+                    }
 
 PixelDriveAudioProcessor::~PixelDriveAudioProcessor() {}
 

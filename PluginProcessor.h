@@ -15,6 +15,8 @@
 #include "modules/AmpSimClass.h"
 #include "modules/DistortionClass.h"
 
+#include "Service/PresetManager.h"
+
 //==============================================================================
 class PixelDriveAudioProcessor  : public juce::AudioProcessor {
  public:
@@ -56,15 +58,15 @@ class PixelDriveAudioProcessor  : public juce::AudioProcessor {
 
     static juce::AudioProcessorValueTreeState::ParameterLayout
         createParameterLayout();
-    juce::AudioProcessorValueTreeState apvts {*this, nullptr,
-                                              "parameters",
-                                              createParameterLayout()};
+    juce::AudioProcessorValueTreeState apvts;
 
     void updateParameters();
 
     using Filter = juce::dsp::IIR::Filter<float>;
     using FilterChain = juce::dsp::ProcessorChain<Filter, Filter, Filter, Filter>;
     void updateNoiseGate(FilterChain& cutChain, float cutoffFreq, double sampleRate);
+
+    Service::PresetManager& getPresetManager() { return *presetManager; }
 
  private:
     //==============================================================================
@@ -85,4 +87,7 @@ class PixelDriveAudioProcessor  : public juce::AudioProcessor {
                                                 Delay<float, 1>, ReverbUnit<float>, FilterChain>;
 
     MonoChain leftChain, rightChain;
+
+    std::unique_ptr<Service::PresetManager> presetManager;
+
 };

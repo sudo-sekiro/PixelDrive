@@ -6,6 +6,8 @@
 #include "UserInterface/CustomSlider.h"
 #include "UserInterface/CustomToggle.h"
 
+#include "UserInterface/PresetPanel.h"
+
 //==============================================================================
 class PixelDriveAudioProcessorEditor  : public juce::AudioProcessorEditor,
                                         juce::AudioProcessorParameter::Listener,
@@ -72,6 +74,8 @@ class PixelDriveAudioProcessorEditor  : public juce::AudioProcessorEditor,
 
     ButtonAttachment distortionBypassButtonAttachment, ampBypassButtonAttachment, delayBypassButtonAttachment,
                      reverbBypassButtonAttachment, reverbShimmerButtonAttachment;
+
+    UserInterface::PresetPanel presetPanel;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PixelDriveAudioProcessorEditor)
 };
