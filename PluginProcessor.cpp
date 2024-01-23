@@ -20,6 +20,7 @@ PixelDriveAudioProcessor::PixelDriveAudioProcessor()
                         apvts.state.setProperty(Service::PresetManager::presetNameProperty, "", nullptr);
                         apvts.state.setProperty("version", ProjectInfo::versionNumber, nullptr);
                         presetManager = std::make_unique<Service::PresetManager>(apvts);
+                        distortionPanel = std::make_unique<DistortionPanel>();
                     }
 
 PixelDriveAudioProcessor::~PixelDriveAudioProcessor() {}

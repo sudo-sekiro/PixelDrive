@@ -7,6 +7,7 @@
 #include "UserInterface/CustomToggle.h"
 
 #include "UserInterface/PresetPanel.h"
+#include "UserInterface/ModulePanels.h"
 
 //==============================================================================
 class PixelDriveAudioProcessorEditor  : public juce::AudioProcessorEditor,
@@ -35,10 +36,6 @@ class PixelDriveAudioProcessorEditor  : public juce::AudioProcessorEditor,
     juce::Atomic<bool> parametersChanged { false };
 
     CustomRotarySlider preGainSlider;
-
-    // Distortion slider
-    CustomRotarySlider distortionPreGainSlider, distortionToneSlider, distortionPostGainSlider, distortionClaritySlider;
-    CustomToggleButton distortionBypassButton{"Bypass"};
 
     // Amp sliders
     CustomRotarySlider ampInputGainSlider, ampLowEndSlider, ampMidsSlider, ampHighEndSlider;

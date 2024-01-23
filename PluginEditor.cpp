@@ -10,11 +10,11 @@ PixelDriveAudioProcessorEditor::PixelDriveAudioProcessorEditor(PixelDriveAudioPr
     : AudioProcessorEditor(&p), processorRef(p),
     preGainSliderAttachment(p.apvts, "preGain", preGainSlider),
     // Distortion attachments
-    distortionPreGainSliderAttachment(p.apvts, "distortionPreGain", distortionPreGainSlider),
-    distortionToneSliderAttachment(p.apvts, "distortionTone", distortionToneSlider),
-    distortionPostGainSliderAttachment(p.apvts, "distortionPostGain", distortionPostGainSlider),
-    distortionClaritySliderAttachment(p.apvts, "distortionClarity", distortionClaritySlider),
-    distortionBypassButtonAttachment(p.apvts, "distortionBypass", distortionBypassButton),
+    distortionPreGainSliderAttachment(p.apvts, "distortionPreGain", p.getDistortionPanel().distortionToneSlider),
+    distortionToneSliderAttachment(p.apvts, "distortionTone", p.getDistortionPanel().distortionToneSlider),
+    distortionPostGainSliderAttachment(p.apvts, "distortionPostGain", p.getDistortionPanel().distortionPostGainSlider),
+    distortionClaritySliderAttachment(p.apvts, "distortionClarity", p.getDistortionPanel().distortionClaritySlider),
+    distortionBypassButtonAttachment(p.apvts, "distortionBypass", p.getDistortionPanel().distortionBypassButton),
     // Amp attachments
     ampInputGainSliderAttachment(p.apvts, "ampInputGain", ampInputGainSlider),
     ampLowEndSliderAttachment(p.apvts, "ampLowEnd", ampLowEndSlider),
@@ -35,9 +35,7 @@ PixelDriveAudioProcessorEditor::PixelDriveAudioProcessorEditor(PixelDriveAudioPr
     reverbShimmerButtonAttachment(p.apvts, "reverbShimmer", reverbShimmerButton),
     noiseGateSliderAttachment(p.apvts, "noiseGate", noiseGateSlider),
     // Preset panel
-    presetPanel(p.getPresetManager())
-{
-    juce::ignoreUnused(processorRef);
+    presetPanel(p.getPresetManager()) {
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
 
@@ -53,6 +51,7 @@ PixelDriveAudioProcessorEditor::PixelDriveAudioProcessorEditor(PixelDriveAudioPr
     }
 
     addAndMakeVisible(presetPanel);
+    addAndMakeVisible(p.getDistortionPanel());
 
     startTimerHz(60);
 
@@ -83,16 +82,10 @@ void PixelDriveAudioProcessorEditor::resized() {
     bounds.reduce(bounds.getWidth() / 25, bounds.getHeight() / 25);
 
     auto distortionBounds = bounds.removeFromLeft(bounds.getWidth() / 4);
+    distortionBounds.setHeight(distortionBounds.getHeight() * 2 / 3);
+    distortionBounds.setY(bounds.getHeight() / 2);
+    processorRef.getDistortionPanel().setBounds(distortionBounds);
 
-    // Distortion top row
-    distortionBounds.removeFromTop(distortionBounds.getHeight() / 4);
-    auto distortionBoundsTop = distortionBounds.removeFromTop(distortionBounds.getHeight() / 4);
-    distortionToneSlider.setBounds(distortionBoundsTop.removeFromLeft(distortionBoundsTop.getWidth() / 3));
-    distortionBypassButton.setBounds(distortionBoundsTop.removeFromLeft(distortionBoundsTop.getWidth() / 2));
-    distortionClaritySlider.setBounds(distortionBoundsTop);
-    // Distortion bottom row
-    distortionPostGainSlider.setBounds(distortionBounds.removeFromLeft(distortionBounds.getWidth() / 2));
-    distortionPreGainSlider.setBounds(distortionBounds);
     // Add amp sliders
     auto ampBounds = bounds.removeFromLeft(bounds.getWidth() * 2 / 3);
     // Add amp padding
@@ -139,8 +132,6 @@ void PixelDriveAudioProcessorEditor::timerCallback() {
 std::vector<juce::Component*> PixelDriveAudioProcessorEditor::getComps() {
     return {
         &preGainSlider,
-        &distortionPreGainSlider, &distortionToneSlider, &distortionPostGainSlider, &distortionClaritySlider,
-        &distortionBypassButton,
         &ampInputGainSlider, &ampLowEndSlider, &ampMidsSlider, &ampHighEndSlider, &ampBypassButton,
         &delayTimeSlider, &delayWetLevelSlider, &delayFeedbackSlider, &delayBypassButton,
         &reverbIntensitySlider, &reverbShimmerButton, &reverbRoomSizeSlider, &reverbWetMixSlider, &reverbSpreadSlider,
@@ -153,13 +144,6 @@ void PixelDriveAudioProcessorEditor::addLabels() {
     /* Add label, max and min values */
     // Pregain
     preGainSlider.addSliderLabels("-24dB", "24dB", "Pregain");
-
-    // Distortion labels
-    distortionPreGainSlider.addSliderLabels("-10dB", "100dB", "Input Gain");
-    distortionToneSlider.addSliderLabels("0", "10", "Tone");
-    distortionPostGainSlider.addSliderLabels("-24dB", "24dB", "Output Gain");
-    distortionClaritySlider.addSliderLabels("0", "10", "Clarity");
-    // distortionBypassButton
 
     // Amp labels
     ampInputGainSlider.addSliderLabels("0", "11", "Input Gain");

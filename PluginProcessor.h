@@ -8,6 +8,7 @@
 #include <iostream>
 #include <fstream>
 #include <cstring>
+#include <memory>
 
 #include "ChainSettings.h"
 #include "modules/DelayClass.h"
@@ -16,6 +17,7 @@
 #include "modules/DistortionClass.h"
 
 #include "Service/PresetManager.h"
+#include "UserInterface/ModulePanels.h"
 
 //==============================================================================
 class PixelDriveAudioProcessor  : public juce::AudioProcessor {
@@ -67,6 +69,7 @@ class PixelDriveAudioProcessor  : public juce::AudioProcessor {
     void updateNoiseGate(FilterChain& cutChain, float cutoffFreq, double sampleRate);
 
     Service::PresetManager& getPresetManager() { return *presetManager; }
+    DistortionPanel& getDistortionPanel() { return *distortionPanel; }
 
  private:
     //==============================================================================
@@ -89,5 +92,6 @@ class PixelDriveAudioProcessor  : public juce::AudioProcessor {
     MonoChain leftChain, rightChain;
 
     std::unique_ptr<Service::PresetManager> presetManager;
+    std::unique_ptr<DistortionPanel> distortionPanel;
 
 };
