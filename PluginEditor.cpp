@@ -22,10 +22,10 @@ PixelDriveAudioProcessorEditor::PixelDriveAudioProcessorEditor(PixelDriveAudioPr
     ampHighEndSliderAttachment(p.apvts, "ampHighEnd", p.getAmpPanel().ampHighEndSlider),
     ampBypassButtonAttachment(p.apvts, "ampBypass", p.getAmpPanel().ampBypassButton),
     // Delay attachments
-    delayTimeSliderAttachment(p.apvts, "delayTime", delayTimeSlider),
-    delayWetLevelSliderAttachment(p.apvts, "delayWetLevel", delayWetLevelSlider),
-    delayFeedbackSliderAttachment(p.apvts, "delayFeedback", delayFeedbackSlider),
-    delayBypassButtonAttachment(p.apvts, "delayBypass", delayBypassButton),
+    delayTimeSliderAttachment(p.apvts, "delayTime", p.getDelayPanel().delayTimeSlider),
+    delayWetLevelSliderAttachment(p.apvts, "delayWetLevel", p.getDelayPanel().delayWetLevelSlider),
+    delayFeedbackSliderAttachment(p.apvts, "delayFeedback", p.getDelayPanel().delayFeedbackSlider),
+    delayBypassButtonAttachment(p.apvts, "delayBypass", p.getDelayPanel().delayBypassButton),
     // Reverb attachments
     reverbIntensitySliderAttachment(p.apvts, "reverbIntensity", reverbIntensitySlider),
     reverbRoomSizeSliderAttachment(p.apvts, "reverbRoomSize", reverbRoomSizeSlider),
@@ -96,14 +96,11 @@ void PixelDriveAudioProcessorEditor::resized() {
     processorRef.getAmpPanel().setBounds(ampBounds);
 
     // Reverb and delay padding
-    bounds.removeFromTop(bounds.getHeight() / 20);
-    bounds.removeFromBottom(bounds.getHeight() / 20);
+    bounds.removeFromTop(bounds.getHeight() / 50);
+    bounds.removeFromBottom(bounds.getHeight() / 50);
     auto delayBounds = bounds.removeFromTop(bounds.getHeight() / 3);
-    auto delayBoundsTopRow = delayBounds.removeFromTop(delayBounds.getHeight() / 2);
-    delayTimeSlider.setBounds(delayBoundsTopRow.removeFromLeft(delayBoundsTopRow.getWidth() / 3));
-    delayWetLevelSlider.setBounds(delayBoundsTopRow.removeFromLeft(delayBoundsTopRow.getWidth() / 2));
-    delayFeedbackSlider.setBounds(delayBoundsTopRow);
-    delayBypassButton.setBounds(delayBounds);
+    processorRef.getDelayPanel().setBounds(delayBounds);
+
     // Add reverb sliders
     bounds.removeFromBottom(bounds.getHeight() / 20);
     auto reverbBoundsTopRow = bounds.removeFromTop(bounds.getHeight() / 3);

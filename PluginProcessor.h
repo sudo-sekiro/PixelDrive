@@ -95,5 +95,4 @@ class PixelDriveAudioProcessor  : public juce::AudioProcessor {
     std::unique_ptr<Service::PresetManager> presetManager;
     std::unique_ptr<DistortionPanel> distortionPanel;
     std::unique_ptr<AmpPanel> ampPanel;
-
 };
