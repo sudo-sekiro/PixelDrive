@@ -54,6 +54,7 @@ PixelDriveAudioProcessorEditor::PixelDriveAudioProcessorEditor(PixelDriveAudioPr
     addAndMakeVisible(presetPanel);
     addAndMakeVisible(p.getDistortionPanel());
     addAndMakeVisible(p.getAmpPanel());
+    addAndMakeVisible(p.getDelayPanel());
     addAndMakeVisible(p.getReverbPanel());
 
     startTimerHz(60);
@@ -122,7 +123,6 @@ void PixelDriveAudioProcessorEditor::timerCallback() {
 std::vector<juce::Component*> PixelDriveAudioProcessorEditor::getComps() {
     return {
         &preGainSlider,
-        &delayTimeSlider, &delayWetLevelSlider, &delayFeedbackSlider, &delayBypassButton,
         &noiseGateSlider
     };
 }
@@ -131,11 +131,6 @@ void PixelDriveAudioProcessorEditor::addLabels() {
     /* Add label, max and min values */
     // Pregain
     preGainSlider.addSliderLabels("-24dB", "24dB", "Pregain");
-
-    // Delay labels
-    delayTimeSlider.addSliderLabels("0", ((juce::String)MAX_DELAY_TIME), "Time");
-    delayWetLevelSlider.addSliderLabels("0", "10", "Wet Mix");
-    delayFeedbackSlider.addSliderLabels("0", "10", "Feedback");
 
     // Noise Gate
     noiseGateSlider.addSliderLabels("100", "20000", "Noise Gate");
