@@ -37,10 +37,6 @@ class PixelDriveAudioProcessorEditor  : public juce::AudioProcessorEditor,
 
     CustomRotarySlider preGainSlider;
 
-    // Amp sliders
-    CustomRotarySlider ampInputGainSlider, ampLowEndSlider, ampMidsSlider, ampHighEndSlider;
-    CustomToggleButton ampBypassButton{"Bypass"};
-
     // Delay sliders
     CustomRotarySlider delayTimeSlider, delayWetLevelSlider, delayFeedbackSlider;
     CustomToggleButton delayBypassButton{"Bypass"};

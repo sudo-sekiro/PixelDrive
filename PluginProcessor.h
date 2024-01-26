@@ -70,6 +70,7 @@ class PixelDriveAudioProcessor  : public juce::AudioProcessor {
 
     Service::PresetManager& getPresetManager() { return *presetManager; }
     DistortionPanel& getDistortionPanel() { return *distortionPanel; }
+    AmpPanel& getAmpPanel() { return *ampPanel; }
 
  private:
     //==============================================================================
@@ -93,5 +94,6 @@ class PixelDriveAudioProcessor  : public juce::AudioProcessor {
 
     std::unique_ptr<Service::PresetManager> presetManager;
     std::unique_ptr<DistortionPanel> distortionPanel;
+    std::unique_ptr<AmpPanel> ampPanel;
 
 };

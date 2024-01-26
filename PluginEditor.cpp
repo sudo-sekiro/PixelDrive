@@ -16,11 +16,11 @@ PixelDriveAudioProcessorEditor::PixelDriveAudioProcessorEditor(PixelDriveAudioPr
     distortionClaritySliderAttachment(p.apvts, "distortionClarity", p.getDistortionPanel().distortionClaritySlider),
     distortionBypassButtonAttachment(p.apvts, "distortionBypass", p.getDistortionPanel().distortionBypassButton),
     // Amp attachments
-    ampInputGainSliderAttachment(p.apvts, "ampInputGain", ampInputGainSlider),
-    ampLowEndSliderAttachment(p.apvts, "ampLowEnd", ampLowEndSlider),
-    ampMidsSliderAttachment(p.apvts, "ampMids", ampMidsSlider),
-    ampHighEndSliderAttachment(p.apvts, "ampHighEnd", ampHighEndSlider),
-    ampBypassButtonAttachment(p.apvts, "ampBypass", ampBypassButton),
+    ampInputGainSliderAttachment(p.apvts, "ampInputGain", p.getAmpPanel().ampInputGainSlider),
+    ampLowEndSliderAttachment(p.apvts, "ampLowEnd", p.getAmpPanel().ampLowEndSlider),
+    ampMidsSliderAttachment(p.apvts, "ampMids", p.getAmpPanel().ampMidsSlider),
+    ampHighEndSliderAttachment(p.apvts, "ampHighEnd", p.getAmpPanel().ampHighEndSlider),
+    ampBypassButtonAttachment(p.apvts, "ampBypass", p.getAmpPanel().ampBypassButton),
     // Delay attachments
     delayTimeSliderAttachment(p.apvts, "delayTime", delayTimeSlider),
     delayWetLevelSliderAttachment(p.apvts, "delayWetLevel", delayWetLevelSlider),
@@ -52,6 +52,7 @@ PixelDriveAudioProcessorEditor::PixelDriveAudioProcessorEditor(PixelDriveAudioPr
 
     addAndMakeVisible(presetPanel);
     addAndMakeVisible(p.getDistortionPanel());
+    addAndMakeVisible(p.getAmpPanel());
 
     startTimerHz(60);
 
@@ -91,12 +92,9 @@ void PixelDriveAudioProcessorEditor::resized() {
     // Add amp padding
     ampBounds.removeFromTop(ampBounds.getHeight() / 2);
     ampBounds.removeFromBottom(ampBounds.getHeight() / 2);
-    // Add amp sliders
-    ampInputGainSlider.setBounds(ampBounds.removeFromLeft(ampBounds.getWidth() / 5));
-    ampLowEndSlider.setBounds(ampBounds.removeFromLeft(ampBounds.getWidth() / 4));
-    ampMidsSlider.setBounds(ampBounds.removeFromLeft(ampBounds.getWidth() / 3));
-    ampHighEndSlider.setBounds(ampBounds.removeFromLeft(ampBounds.getWidth() / 2));
-    ampBypassButton.setBounds(ampBounds);
+
+    processorRef.getAmpPanel().setBounds(ampBounds);
+
     // Reverb and delay padding
     bounds.removeFromTop(bounds.getHeight() / 20);
     bounds.removeFromBottom(bounds.getHeight() / 20);
@@ -132,7 +130,6 @@ void PixelDriveAudioProcessorEditor::timerCallback() {
 std::vector<juce::Component*> PixelDriveAudioProcessorEditor::getComps() {
     return {
         &preGainSlider,
-        &ampInputGainSlider, &ampLowEndSlider, &ampMidsSlider, &ampHighEndSlider, &ampBypassButton,
         &delayTimeSlider, &delayWetLevelSlider, &delayFeedbackSlider, &delayBypassButton,
         &reverbIntensitySlider, &reverbShimmerButton, &reverbRoomSizeSlider, &reverbWetMixSlider, &reverbSpreadSlider,
         &reverbBypassButton,
@@ -144,12 +141,6 @@ void PixelDriveAudioProcessorEditor::addLabels() {
     /* Add label, max and min values */
     // Pregain
     preGainSlider.addSliderLabels("-24dB", "24dB", "Pregain");
-
-    // Amp labels
-    ampInputGainSlider.addSliderLabels("0", "11", "Input Gain");
-    ampLowEndSlider.addSliderLabels("0", "11", "Bass");
-    ampMidsSlider.addSliderLabels("0", "11", "Mids");
-    ampHighEndSlider.addSliderLabels("0", "11", "Treble");
 
     // Delay labels
     delayTimeSlider.addSliderLabels("0", ((juce::String)MAX_DELAY_TIME), "Time");
