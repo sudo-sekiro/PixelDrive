@@ -27,12 +27,13 @@ PixelDriveAudioProcessorEditor::PixelDriveAudioProcessorEditor(PixelDriveAudioPr
     delayFeedbackSliderAttachment(p.apvts, "delayFeedback", p.getDelayPanel().delayFeedbackSlider),
     delayBypassButtonAttachment(p.apvts, "delayBypass", p.getDelayPanel().delayBypassButton),
     // Reverb attachments
-    reverbIntensitySliderAttachment(p.apvts, "reverbIntensity", reverbIntensitySlider),
-    reverbRoomSizeSliderAttachment(p.apvts, "reverbRoomSize", reverbRoomSizeSlider),
-    reverbWetMixSliderAttachment(p.apvts, "reverbWetMix", reverbWetMixSlider),
-    reverbSpreadSliderAttachment(p.apvts, "reverbSpread", reverbSpreadSlider),
-    reverbBypassButtonAttachment(p.apvts, "reverbBypass", reverbBypassButton),
-    reverbShimmerButtonAttachment(p.apvts, "reverbShimmer", reverbShimmerButton),
+    reverbIntensitySliderAttachment(p.apvts, "reverbIntensity", p.getReverbPanel().reverbIntensitySlider),
+    reverbRoomSizeSliderAttachment(p.apvts, "reverbRoomSize", p.getReverbPanel().reverbRoomSizeSlider),
+    reverbWetMixSliderAttachment(p.apvts, "reverbWetMix", p.getReverbPanel().reverbWetMixSlider),
+    reverbSpreadSliderAttachment(p.apvts, "reverbSpread", p.getReverbPanel().reverbSpreadSlider),
+    reverbBypassButtonAttachment(p.apvts, "reverbBypass", p.getReverbPanel().reverbBypassButton),
+    reverbShimmerButtonAttachment(p.apvts, "reverbShimmer", p.getReverbPanel().reverbShimmerButton),
+    // Noise gate attachment
     noiseGateSliderAttachment(p.apvts, "noiseGate", noiseGateSlider),
     // Preset panel
     presetPanel(p.getPresetManager()) {
@@ -53,6 +54,7 @@ PixelDriveAudioProcessorEditor::PixelDriveAudioProcessorEditor(PixelDriveAudioPr
     addAndMakeVisible(presetPanel);
     addAndMakeVisible(p.getDistortionPanel());
     addAndMakeVisible(p.getAmpPanel());
+    addAndMakeVisible(p.getReverbPanel());
 
     startTimerHz(60);
 
@@ -103,14 +105,7 @@ void PixelDriveAudioProcessorEditor::resized() {
 
     // Add reverb sliders
     bounds.removeFromBottom(bounds.getHeight() / 20);
-    auto reverbBoundsTopRow = bounds.removeFromTop(bounds.getHeight() / 3);
-    reverbIntensitySlider.setBounds(reverbBoundsTopRow.removeFromLeft(reverbBoundsTopRow.getWidth() / 2));
-    reverbWetMixSlider.setBounds(reverbBoundsTopRow);
-    auto reverbBoundsMidRow = bounds.removeFromTop(bounds.getHeight() / 2);
-    reverbRoomSizeSlider.setBounds(reverbBoundsMidRow.removeFromLeft(reverbBoundsMidRow.getWidth() / 2));
-    reverbSpreadSlider.setBounds(reverbBoundsMidRow);
-    reverbShimmerButton.setBounds(bounds.removeFromTop(bounds.getHeight() / 2));
-    reverbBypassButton.setBounds(bounds);
+    processorRef.getReverbPanel().setBounds(bounds);
 }
 
 void PixelDriveAudioProcessorEditor::parameterValueChanged(int parameterIndex, float newValue) {
@@ -128,8 +123,6 @@ std::vector<juce::Component*> PixelDriveAudioProcessorEditor::getComps() {
     return {
         &preGainSlider,
         &delayTimeSlider, &delayWetLevelSlider, &delayFeedbackSlider, &delayBypassButton,
-        &reverbIntensitySlider, &reverbShimmerButton, &reverbRoomSizeSlider, &reverbWetMixSlider, &reverbSpreadSlider,
-        &reverbBypassButton,
         &noiseGateSlider
     };
 }
@@ -143,12 +136,6 @@ void PixelDriveAudioProcessorEditor::addLabels() {
     delayTimeSlider.addSliderLabels("0", ((juce::String)MAX_DELAY_TIME), "Time");
     delayWetLevelSlider.addSliderLabels("0", "10", "Wet Mix");
     delayFeedbackSlider.addSliderLabels("0", "10", "Feedback");
-
-    // Reverb labels
-    reverbIntensitySlider.addSliderLabels("0", "10", "Intensity");
-    reverbRoomSizeSlider.addSliderLabels("0", "10", "Room Size");
-    reverbWetMixSlider.addSliderLabels("0", "10", "Wet Mix");
-    reverbSpreadSlider.addSliderLabels("0", "10", "Spread");
 
     // Noise Gate
     noiseGateSlider.addSliderLabels("100", "20000", "Noise Gate");

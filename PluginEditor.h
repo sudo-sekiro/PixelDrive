@@ -41,10 +41,6 @@ class PixelDriveAudioProcessorEditor  : public juce::AudioProcessorEditor,
     CustomRotarySlider delayTimeSlider, delayWetLevelSlider, delayFeedbackSlider;
     CustomToggleButton delayBypassButton{"Bypass"};
 
-    // Reverb sliders
-    CustomRotarySlider reverbIntensitySlider, reverbRoomSizeSlider, reverbWetMixSlider, reverbSpreadSlider;
-    CustomToggleButton reverbBypassButton{"Bypass"}, reverbShimmerButton{"Shimmer"};
-
     // Noise gate slider
     CustomRotarySlider noiseGateSlider;
 

@@ -22,6 +22,7 @@ PixelDriveAudioProcessor::PixelDriveAudioProcessor()
                         presetManager = std::make_unique<Service::PresetManager>(apvts);
                         distortionPanel = std::make_unique<DistortionPanel>();
                         ampPanel = std::make_unique<AmpPanel>();
+                        reverbPanel = std::make_unique<ReverbPanel>();
                     }
 
 PixelDriveAudioProcessor::~PixelDriveAudioProcessor() {}
