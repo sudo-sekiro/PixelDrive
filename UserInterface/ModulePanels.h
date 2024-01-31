@@ -12,6 +12,11 @@
 #include <vector>
 
 #define HEADER_SIZE 30
+#define MODULE_PADDING 5
+#define HEADER_PROPORTION 0.25
+
+#define DISTORTION_TOP_COMPONENT_PROPORTION 0.3333
+#define DISTORTION_BOTTOM_COMPONENT_PROPORTION 0.5
 
 // UI component for the distortion pedal
 class DistortionPanel : public Component {
@@ -40,32 +45,38 @@ class DistortionPanel : public Component {
     }
 
     void DistortionPanel::resized() override {
-        const auto container = getLocalBounds().reduced(4);
+        const auto container = getLocalBounds().reduced(MODULE_PADDING);
         auto distortionBounds = container;
 
         // Distortion top row
-        auto title = distortionBounds.removeFromTop(distortionBounds.getHeight() / 4);
-        auto distortionBoundsTop = distortionBounds.removeFromTop(distortionBounds.getHeight() / 4);
-        distortionToneSlider.setBounds(distortionBoundsTop.removeFromLeft(distortionBoundsTop.getWidth() / 3));
-        distortionBypassButton.setBounds(distortionBoundsTop.removeFromLeft(distortionBoundsTop.getWidth() / 2));
+        auto title = distortionBounds.removeFromTop(distortionBounds.proportionOfHeight(HEADER_PROPORTION));
+        auto distortionBoundsTop = distortionBounds.removeFromTop(distortionBounds.getHeight() / 2);
+        distortionToneSlider.setBounds(distortionBoundsTop.removeFromLeft(
+            container.proportionOfWidth(DISTORTION_TOP_COMPONENT_PROPORTION)));
+        distortionBypassButton.setBounds(distortionBoundsTop.removeFromLeft(
+            container.proportionOfWidth(DISTORTION_TOP_COMPONENT_PROPORTION)));
         distortionClaritySlider.setBounds(distortionBoundsTop);
         // Distortion bottom row
-        distortionPostGainSlider.setBounds(distortionBounds.removeFromLeft(distortionBounds.getWidth() / 2));
+        distortionPostGainSlider.setBounds(distortionBounds.removeFromLeft(
+            container.proportionOfWidth(DISTORTION_BOTTOM_COMPONENT_PROPORTION)));
         distortionPreGainSlider.setBounds(distortionBounds);
     }
 
     void DistortionPanel::paint(juce::Graphics& g) override {
         auto bounds = getLocalBounds();
         g.drawRect(bounds);
-        auto titleText = bounds.removeFromTop(bounds.getHeight() / 4);
+        auto titleText = bounds.removeFromTop(bounds.proportionOfHeight(HEADER_PROPORTION));
         g.setColour(Colour(0u, 172u, 1u));
         g.setFont(static_cast<float>(HEADER_SIZE));
-        g.drawFittedText("distortion", titleText.toNearestInt(), juce::Justification::centred, 1);
+        g.drawFittedText("Distortion", titleText.toNearestInt(), juce::Justification::centred, 1);
     }
 
  private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(DistortionPanel);
 };
+
+#define AMP_COMPONENT_BOUNDS_PROPORTION 0.33
+#define AMP_COMPONENT_PROPORTION 0.2
 
 // UI component for the amplifier simulator
 class AmpPanel : public Component {
@@ -94,24 +105,26 @@ class AmpPanel : public Component {
     }
 
     void AmpPanel::resized() override {
-        const auto container = getLocalBounds();
+        const auto container = getLocalBounds().reduced(MODULE_PADDING);
         auto ampBounds = container;
 
         // Title text
-        ampBounds.removeFromTop(ampBounds.getHeight() / 4);
+        ampBounds.removeFromTop(ampBounds.proportionOfHeight(HEADER_PROPORTION));
 
         // Add amp sliders
-        ampInputGainSlider.setBounds(ampBounds.removeFromLeft(ampBounds.getWidth() / 5));
-        ampLowEndSlider.setBounds(ampBounds.removeFromLeft(ampBounds.getWidth() / 4));
-        ampMidsSlider.setBounds(ampBounds.removeFromLeft(ampBounds.getWidth() / 3));
-        ampHighEndSlider.setBounds(ampBounds.removeFromLeft(ampBounds.getWidth() / 2));
-        ampBypassButton.setBounds(ampBounds);
+        auto ampBottomBar = ampBounds.removeFromBottom(container.proportionOfHeight(AMP_COMPONENT_BOUNDS_PROPORTION));
+        ampInputGainSlider.setBounds(
+            ampBottomBar.removeFromLeft(container.proportionOfWidth(AMP_COMPONENT_PROPORTION)));
+        ampLowEndSlider.setBounds(ampBottomBar.removeFromLeft(container.proportionOfWidth(AMP_COMPONENT_PROPORTION)));
+        ampMidsSlider.setBounds(ampBottomBar.removeFromLeft(container.proportionOfWidth(AMP_COMPONENT_PROPORTION)));
+        ampHighEndSlider.setBounds(ampBottomBar.removeFromLeft(container.proportionOfWidth(AMP_COMPONENT_PROPORTION)));
+        ampBypassButton.setBounds(ampBottomBar);
     }
 
     void AmpPanel::paint(juce::Graphics& g) override {
         auto bounds = getLocalBounds();
         g.drawRect(bounds);
-        auto titleText = bounds.removeFromTop(bounds.getHeight() / 4);
+        auto titleText = bounds.removeFromTop(bounds.proportionOfHeight(HEADER_PROPORTION));
         g.setColour(Colour(0u, 172u, 1u));
         g.setFont(static_cast<float>(HEADER_SIZE));
         g.drawFittedText("Amp", titleText.toNearestInt(), juce::Justification::centred, 1);
@@ -120,6 +133,8 @@ class AmpPanel : public Component {
  private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AmpPanel);
 };
+
+#define DELAY_COMPONENT_PROPORTION 0.25
 
 // UI component for the delay module
 class DelayPanel : public Component {
@@ -146,24 +161,26 @@ class DelayPanel : public Component {
     }
 
     void DelayPanel::resized() override {
-        const auto container = getLocalBounds();
-        auto delayBounds = container;
+        auto delayBounds = getLocalBounds().reduced(MODULE_PADDING);
 
         // Title text
-        delayBounds.removeFromTop(delayBounds.getHeight() / 4);
+        delayBounds.removeFromTop(delayBounds.proportionOfHeight(HEADER_PROPORTION));
+        const auto container = delayBounds;
 
         // Add Delay sliders
-        auto delayBoundsTopRow = delayBounds.removeFromTop(delayBounds.getHeight() / 2);
-        delayTimeSlider.setBounds(delayBoundsTopRow.removeFromLeft(delayBoundsTopRow.getWidth() / 3));
-        delayWetLevelSlider.setBounds(delayBoundsTopRow.removeFromLeft(delayBoundsTopRow.getWidth() / 2));
-        delayFeedbackSlider.setBounds(delayBoundsTopRow);
+        delayTimeSlider.setBounds(
+            delayBounds.removeFromTop(container.proportionOfHeight(DELAY_COMPONENT_PROPORTION)));
+        delayWetLevelSlider.setBounds(
+            delayBounds.removeFromTop(container.proportionOfHeight(DELAY_COMPONENT_PROPORTION)));
+        delayFeedbackSlider.setBounds(
+            delayBounds.removeFromTop(container.proportionOfHeight(DELAY_COMPONENT_PROPORTION)));
         delayBypassButton.setBounds(delayBounds);
     }
 
     void DelayPanel::paint(juce::Graphics& g) override {
         auto bounds = getLocalBounds();
         g.drawRect(bounds);
-        auto titleText = bounds.removeFromTop(bounds.getHeight() / 4);
+        auto titleText = bounds.removeFromTop(bounds.proportionOfHeight(HEADER_PROPORTION));
         g.setColour(Colour(0u, 172u, 1u));
         g.setFont(static_cast<float>(HEADER_SIZE));
         g.drawFittedText("Delay", titleText.toNearestInt(), juce::Justification::centred, 1);
@@ -172,6 +189,10 @@ class DelayPanel : public Component {
  private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(DelayPanel);
 };
+
+#define REVERB_ROW_PROPORTION 0.3333
+#define REVERB_BUTTON_ROW_PROPORTION 0.5
+#define REVERB_COMPONENT_PROPORTION 0.5
 
 // UI component for the reverb module
 class ReverbPanel : public Component {
@@ -200,27 +221,32 @@ class ReverbPanel : public Component {
     }
 
     void ReverbPanel::resized() override {
-        const auto container = getLocalBounds();
-        auto reverbBounds = container;
+        auto reverbBounds = getLocalBounds().reduced(MODULE_PADDING);
 
         // Title text
-        reverbBounds.removeFromTop(reverbBounds.getHeight() / 4);
+        reverbBounds.removeFromTop(reverbBounds.proportionOfHeight(HEADER_PROPORTION));
+        const auto container = reverbBounds;
 
         // Add reverb sliders
-        auto reverbBoundsTopRow = reverbBounds.removeFromTop(reverbBounds.getHeight() / 3);
-        reverbIntensitySlider.setBounds(reverbBoundsTopRow.removeFromLeft(reverbBoundsTopRow.getWidth() / 2));
+        auto reverbBoundsTopRow = reverbBounds.removeFromTop(container.proportionOfHeight(REVERB_ROW_PROPORTION));
+        reverbIntensitySlider.setBounds(
+            reverbBoundsTopRow.removeFromLeft(container.proportionOfWidth(REVERB_COMPONENT_PROPORTION)));
         reverbWetMixSlider.setBounds(reverbBoundsTopRow);
-        auto reverbBoundsMidRow = reverbBounds.removeFromTop(reverbBounds.getHeight() / 2);
-        reverbRoomSizeSlider.setBounds(reverbBoundsMidRow.removeFromLeft(reverbBoundsMidRow.getWidth() / 2));
+
+        auto reverbBoundsMidRow = reverbBounds.removeFromTop(container.proportionOfHeight(REVERB_ROW_PROPORTION));
+        reverbRoomSizeSlider.setBounds(
+            reverbBoundsMidRow.removeFromLeft(container.proportionOfWidth(REVERB_COMPONENT_PROPORTION)));
         reverbSpreadSlider.setBounds(reverbBoundsMidRow);
-        reverbShimmerButton.setBounds(reverbBounds.removeFromTop(reverbBounds.getHeight() / 2));
+
+        reverbShimmerButton.setBounds(
+            reverbBounds.removeFromTop(reverbBounds.proportionOfHeight(REVERB_BUTTON_ROW_PROPORTION)));
         reverbBypassButton.setBounds(reverbBounds);
     }
 
     void ReverbPanel::paint(juce::Graphics& g) override {
         auto bounds = getLocalBounds();
         g.drawRect(bounds);
-        auto titleText = bounds.removeFromTop(bounds.getHeight() / 4);
+        auto titleText = bounds.removeFromTop(bounds.proportionOfHeight(HEADER_PROPORTION));
         g.setColour(Colour(0u, 172u, 1u));
         g.setFont(static_cast<float>(HEADER_SIZE));
         g.drawFittedText("Reverb", titleText.toNearestInt(), juce::Justification::centred, 1);
