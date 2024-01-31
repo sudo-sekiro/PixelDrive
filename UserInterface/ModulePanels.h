@@ -15,6 +15,7 @@
 #define MODULE_PADDING 5
 #define HEADER_PROPORTION 0.25
 
+#define DISTORTION_ROW_PROPORTION 0.5
 #define DISTORTION_TOP_COMPONENT_PROPORTION 0.3333
 #define DISTORTION_BOTTOM_COMPONENT_PROPORTION 0.5
 
@@ -47,19 +48,22 @@ class DistortionPanel : public Component {
     void DistortionPanel::resized() override {
         const auto container = getLocalBounds().reduced(MODULE_PADDING);
         auto distortionBounds = container;
+        auto title = distortionBounds.removeFromTop(distortionBounds.proportionOfHeight(HEADER_PROPORTION));
 
         // Distortion top row
-        auto title = distortionBounds.removeFromTop(distortionBounds.proportionOfHeight(HEADER_PROPORTION));
-        auto distortionBoundsTop = distortionBounds.removeFromTop(distortionBounds.getHeight() / 2);
-        distortionToneSlider.setBounds(distortionBoundsTop.removeFromLeft(
-            container.proportionOfWidth(DISTORTION_TOP_COMPONENT_PROPORTION)));
-        distortionBypassButton.setBounds(distortionBoundsTop.removeFromLeft(
-            container.proportionOfWidth(DISTORTION_TOP_COMPONENT_PROPORTION)));
-        distortionClaritySlider.setBounds(distortionBoundsTop);
-        // Distortion bottom row
-        distortionPostGainSlider.setBounds(distortionBounds.removeFromLeft(
+        auto distortionBoundsTop = distortionBounds.removeFromTop(
+            distortionBounds.proportionOfHeight(DISTORTION_ROW_PROPORTION));
+
+        distortionPreGainSlider.setBounds(distortionBoundsTop.removeFromLeft(
             container.proportionOfWidth(DISTORTION_BOTTOM_COMPONENT_PROPORTION)));
-        distortionPreGainSlider.setBounds(distortionBounds);
+        distortionPostGainSlider.setBounds(distortionBoundsTop);
+
+        // Distortion bottom row
+        distortionToneSlider.setBounds(distortionBounds.removeFromLeft(
+            container.proportionOfWidth(DISTORTION_TOP_COMPONENT_PROPORTION)));
+        distortionBypassButton.setBounds(distortionBounds.removeFromLeft(
+            container.proportionOfWidth(DISTORTION_TOP_COMPONENT_PROPORTION)));
+        distortionClaritySlider.setBounds(distortionBounds);
     }
 
     void DistortionPanel::paint(juce::Graphics& g) override {
