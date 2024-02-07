@@ -1,5 +1,9 @@
 #include "UserInterface/CustomSlider.h"
 
+#define SLIDER_INDICATOR_COLOUR_HEX 0xff508da1
+#define SLIDER_INDICATOR_THICKNESS 2
+#define SLIDER_INDICATOR_HEIGHT_PADDING 0.11
+
 void CustomLookAndFeel::drawRotarySlider(juce::Graphics &g,
                                    int x,
                                    int y,
@@ -18,8 +22,15 @@ void CustomLookAndFeel::drawRotarySlider(juce::Graphics &g,
                                    static_cast<float>(width),
                                    static_cast<float>(height));
 
-    g.setColour(Colour(255u, 154u, 1u));
-    g.drawEllipse(bounds, 1.f);
+    g.setColour(juce::Colour(SLIDER_INDICATOR_COLOUR_HEX));
+
+    // Draw background
+    juce::Image sliderBackground = ImageFileFormat::loadFrom(BinaryData::knob_png,
+                                                             BinaryData::knob_pngSize);
+    g.drawImage(sliderBackground,  // Image to draw
+                bounds.toFloat(),  // Rectangle to draw within
+                juce::RectanglePlacement::fillDestination,  // placementWithinTarget - default stretchToFit
+                false);  // fillAlphaChannelWithCurrentBrush
 
     auto center = bounds.getCentre();
 
@@ -27,9 +38,9 @@ void CustomLookAndFeel::drawRotarySlider(juce::Graphics &g,
 
     Rectangle<float> r;
 
-    r.setLeft(center.getX() - 2);
-    r.setRight(center.getX() + 2);
-    r.setTop(bounds.getY());
+    r.setLeft(center.getX() - SLIDER_INDICATOR_THICKNESS);
+    r.setRight(center.getX() + SLIDER_INDICATOR_THICKNESS);
+    r.setTop(bounds.getY() + bounds.proportionOfHeight(SLIDER_INDICATOR_HEIGHT_PADDING));
     r.setBottom(center.getY());
 
     p.addRectangle(r);
@@ -75,7 +86,7 @@ void CustomRotarySlider::paint(juce::Graphics &g) {
 
     auto center = sliderBounds.toFloat().getCentre();
     auto radius = sliderBounds.toFloat().getHeight() / 2.f;
-    g.setColour(Colour(0u, 172u, 1u));
+    g.setColour(juce::Colours::black);
     g.setFont(static_cast<float>(getTextHeight()));
     auto numChoices = labels.size();
     for (int i = 0; i < numChoices; i++) {
