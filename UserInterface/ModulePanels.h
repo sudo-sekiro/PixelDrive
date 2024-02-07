@@ -15,6 +15,7 @@
 #define MODULE_PADDING 5
 #define HEADER_PROPORTION 0.25
 #define COMPONENT_WIDTH_PADDING 0.05
+#define HEADER_COLOUR juce::Colours::black
 
 #define DISTORTION_ROW_PROPORTION 0.5
 #define DISTORTION_TOP_COMPONENT_PROPORTION 0.3333
@@ -81,7 +82,7 @@ class DistortionPanel : public Component {
                     false);  // fillAlphaChannelWithCurrentBrush
 
         auto titleText = bounds.removeFromTop(bounds.proportionOfHeight(HEADER_PROPORTION));
-        g.setColour(Colour(0u, 172u, 1u));
+        g.setColour(HEADER_COLOUR);
         g.setFont(static_cast<float>(HEADER_SIZE));
         g.drawFittedText("Distortion", titleText.toNearestInt(), juce::Justification::centred, 1);
     }
@@ -206,7 +207,7 @@ class DelayPanel : public Component {
                     false);  // fillAlphaChannelWithCurrentBrush
 
         auto titleText = bounds.removeFromTop(bounds.proportionOfHeight(HEADER_PROPORTION));
-        g.setColour(Colour(0u, 172u, 1u));
+        g.setColour(HEADER_COLOUR);
         g.setFont(static_cast<float>(HEADER_SIZE));
         g.drawFittedText("Delay", titleText.toNearestInt(), juce::Justification::centred, 1);
     }
@@ -279,7 +280,7 @@ class ReverbPanel : public Component {
                     juce::RectanglePlacement::fillDestination,  // placementWithinTarget - default stretchToFit
                     false);  // fillAlphaChannelWithCurrentBrush
         auto titleText = bounds.removeFromTop(bounds.proportionOfHeight(HEADER_PROPORTION));
-        g.setColour(Colour(0u, 172u, 1u));
+        g.setColour(HEADER_COLOUR);
         g.setFont(static_cast<float>(HEADER_SIZE));
         g.drawFittedText("Reverb", titleText.toNearestInt(), juce::Justification::centred, 1);
     }
