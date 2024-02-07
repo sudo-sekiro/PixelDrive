@@ -14,6 +14,7 @@
 #define HEADER_SIZE 30
 #define MODULE_PADDING 5
 #define HEADER_PROPORTION 0.25
+#define COMPONENT_WIDTH_PADDING 0.05
 
 #define DISTORTION_ROW_PROPORTION 0.5
 #define DISTORTION_TOP_COMPONENT_PROPORTION 0.3333
@@ -46,8 +47,10 @@ class DistortionPanel : public Component {
     }
 
     void DistortionPanel::resized() override {
-        const auto container = getLocalBounds().reduced(MODULE_PADDING);
-        auto distortionBounds = container;
+        auto distortionBounds = getLocalBounds().reduced(MODULE_PADDING);
+        // Reduce width to fit background
+        distortionBounds.reduce(distortionBounds.proportionOfWidth(COMPONENT_WIDTH_PADDING), 0);
+        const auto container = distortionBounds;
         auto title = distortionBounds.removeFromTop(distortionBounds.proportionOfHeight(HEADER_PROPORTION));
 
         // Distortion top row
@@ -69,6 +72,14 @@ class DistortionPanel : public Component {
     void DistortionPanel::paint(juce::Graphics& g) override {
         auto bounds = getLocalBounds();
         g.drawRect(bounds);
+        // Draw background
+        juce::Image distortionBackground = ImageFileFormat::loadFrom(BinaryData::distortion_png,
+                                                                     BinaryData::distortion_pngSize);
+        g.drawImage(distortionBackground,  // Image to draw
+                    bounds.toFloat(),  // Rectangle to draw within
+                    juce::RectanglePlacement::fillDestination,  // placementWithinTarget - default stretchToFit
+                    false);  // fillAlphaChannelWithCurrentBrush
+
         auto titleText = bounds.removeFromTop(bounds.proportionOfHeight(HEADER_PROPORTION));
         g.setColour(Colour(0u, 172u, 1u));
         g.setFont(static_cast<float>(HEADER_SIZE));
@@ -79,7 +90,7 @@ class DistortionPanel : public Component {
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(DistortionPanel);
 };
 
-#define AMP_COMPONENT_BOUNDS_PROPORTION 0.33
+#define AMP_COMPONENT_BOUNDS_PROPORTION 0.3
 #define AMP_COMPONENT_PROPORTION 0.2
 
 // UI component for the amplifier simulator
@@ -109,11 +120,10 @@ class AmpPanel : public Component {
     }
 
     void AmpPanel::resized() override {
-        const auto container = getLocalBounds().reduced(MODULE_PADDING);
-        auto ampBounds = container;
-
-        // Title text
-        ampBounds.removeFromTop(ampBounds.proportionOfHeight(HEADER_PROPORTION));
+        auto ampBounds = getLocalBounds().reduced(MODULE_PADDING);
+        // Reduce width to fit background
+        ampBounds.reduce(ampBounds.proportionOfWidth(COMPONENT_WIDTH_PADDING), 0);
+        const auto container = ampBounds;
 
         // Add amp sliders
         auto ampBottomBar = ampBounds.removeFromBottom(container.proportionOfHeight(AMP_COMPONENT_BOUNDS_PROPORTION));
@@ -128,10 +138,13 @@ class AmpPanel : public Component {
     void AmpPanel::paint(juce::Graphics& g) override {
         auto bounds = getLocalBounds();
         g.drawRect(bounds);
-        auto titleText = bounds.removeFromTop(bounds.proportionOfHeight(HEADER_PROPORTION));
-        g.setColour(Colour(0u, 172u, 1u));
-        g.setFont(static_cast<float>(HEADER_SIZE));
-        g.drawFittedText("Amp", titleText.toNearestInt(), juce::Justification::centred, 1);
+        // Draw background
+        juce::Image ampBackground = ImageFileFormat::loadFrom(BinaryData::amp_png,
+                                                              BinaryData::amp_pngSize);
+        g.drawImage(ampBackground,  // Image to draw
+                    bounds.toFloat(),  // Rectangle to draw within
+                    juce::RectanglePlacement::fillDestination,  // placementWithinTarget - default stretchToFit
+                    false);  // fillAlphaChannelWithCurrentBrush
     }
 
  private:
@@ -184,6 +197,14 @@ class DelayPanel : public Component {
     void DelayPanel::paint(juce::Graphics& g) override {
         auto bounds = getLocalBounds();
         g.drawRect(bounds);
+        // Draw background
+        juce::Image delayBackground = ImageFileFormat::loadFrom(BinaryData::delay_png,
+                                                              BinaryData::delay_pngSize);
+        g.drawImage(delayBackground,  // Image to draw
+                    bounds.toFloat(),  // Rectangle to draw within
+                    juce::RectanglePlacement::fillDestination,  // placementWithinTarget - default stretchToFit
+                    false);  // fillAlphaChannelWithCurrentBrush
+
         auto titleText = bounds.removeFromTop(bounds.proportionOfHeight(HEADER_PROPORTION));
         g.setColour(Colour(0u, 172u, 1u));
         g.setFont(static_cast<float>(HEADER_SIZE));
@@ -250,6 +271,13 @@ class ReverbPanel : public Component {
     void ReverbPanel::paint(juce::Graphics& g) override {
         auto bounds = getLocalBounds();
         g.drawRect(bounds);
+        // Draw background
+        juce::Image reverbBackground = ImageFileFormat::loadFrom(BinaryData::reverb_png,
+                                                              BinaryData::reverb_pngSize);
+        g.drawImage(reverbBackground,  // Image to draw
+                    bounds.toFloat(),  // Rectangle to draw within
+                    juce::RectanglePlacement::fillDestination,  // placementWithinTarget - default stretchToFit
+                    false);  // fillAlphaChannelWithCurrentBrush
         auto titleText = bounds.removeFromTop(bounds.proportionOfHeight(HEADER_PROPORTION));
         g.setColour(Colour(0u, 172u, 1u));
         g.setFont(static_cast<float>(HEADER_SIZE));
