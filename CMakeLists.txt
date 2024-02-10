@@ -105,7 +105,11 @@ juce_add_binary_data(PixelDrivePluginData SOURCES
     Resources/amp.png
     Resources/reverb.png
     Resources/delay.png
-    Resources/knob.png)
+    Resources/knob.png
+    Resources/toggle_button_on.png
+    Resources/toggle_button_off.png
+    Resources/toggle_on_down.png
+    Resources/toggle_off_down.png)
 
 # `target_link_libraries` links libraries and JUCE modules to other libraries or executables. Here,
 # we're linking our executable target to the `juce::juce_audio_utils` module. Inter-module
