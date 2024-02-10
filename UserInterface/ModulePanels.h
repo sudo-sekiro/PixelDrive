@@ -93,6 +93,7 @@ class DistortionPanel : public Component {
 
 #define AMP_COMPONENT_BOUNDS_PROPORTION 0.3
 #define AMP_COMPONENT_PROPORTION 0.2
+#define AMP_TOGGLE_PADDING 0.4
 
 // UI component for the amplifier simulator
 class AmpPanel : public Component {
@@ -133,6 +134,7 @@ class AmpPanel : public Component {
         ampLowEndSlider.setBounds(ampBottomBar.removeFromLeft(container.proportionOfWidth(AMP_COMPONENT_PROPORTION)));
         ampMidsSlider.setBounds(ampBottomBar.removeFromLeft(container.proportionOfWidth(AMP_COMPONENT_PROPORTION)));
         ampHighEndSlider.setBounds(ampBottomBar.removeFromLeft(container.proportionOfWidth(AMP_COMPONENT_PROPORTION)));
+        ampBottomBar.removeFromBottom(ampBottomBar.proportionOfHeight(AMP_TOGGLE_PADDING));
         ampBypassButton.setBounds(ampBottomBar);
     }
 
@@ -153,6 +155,7 @@ class AmpPanel : public Component {
 };
 
 #define DELAY_COMPONENT_PROPORTION 0.25
+#define DELAY_TOGGLE_PADDING 0.05
 
 // UI component for the delay module
 class DelayPanel : public Component {
@@ -192,6 +195,7 @@ class DelayPanel : public Component {
             delayBounds.removeFromTop(container.proportionOfHeight(DELAY_COMPONENT_PROPORTION)));
         delayFeedbackSlider.setBounds(
             delayBounds.removeFromTop(container.proportionOfHeight(DELAY_COMPONENT_PROPORTION)));
+        delayBounds.removeFromBottom(container.proportionOfHeight(DELAY_TOGGLE_PADDING));
         delayBypassButton.setBounds(delayBounds);
     }
 
