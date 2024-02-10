@@ -5,6 +5,9 @@
 #include "UserInterface/CustomSlider.cpp"
 #include "UserInterface/CustomToggle.cpp"
 
+#define MODULE_PADDING 5
+#define BACKGROUND_COLOUR 0xfffcffb8
+
 //==============================================================================
 PixelDriveAudioProcessorEditor::PixelDriveAudioProcessorEditor(PixelDriveAudioProcessor& p)
     : AudioProcessorEditor(&p), processorRef(p),
@@ -59,7 +62,7 @@ PixelDriveAudioProcessorEditor::PixelDriveAudioProcessorEditor(PixelDriveAudioPr
 
     startTimerHz(60);
 
-    setSize(900, 600);
+    setSize(1080, 600);
 }
 
 PixelDriveAudioProcessorEditor::~PixelDriveAudioProcessorEditor() {
@@ -71,42 +74,58 @@ PixelDriveAudioProcessorEditor::~PixelDriveAudioProcessorEditor() {
 
 //==============================================================================
 void PixelDriveAudioProcessorEditor::paint(juce::Graphics& g) {
-    // (Our component is opaque, so we must completely fill the background with a solid colour)
-    g.fillAll(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
+    const auto container = getLocalBounds();
+    auto bounds = container;
+    // Fill the window with our background colour
+    g.setColour(juce::Colour(BACKGROUND_COLOUR));
+    g.fillRect(bounds);
 }
 
-void PixelDriveAudioProcessorEditor::resized() {
-    auto bounds = getLocalBounds();
+#define BOUNDS_WIDTH_PADDING 0.02
+#define PEDAL_HEIGHT_PADDING_PROPORTION 0.125
+#define AMP_HEIGHT_PADDING_PROPORTION 0.1
 
-    auto topBar = bounds.removeFromTop(bounds.getHeight() / 6);
-    preGainSlider.setBounds(topBar.removeFromLeft(topBar.getWidth() * 1 / 4));
-    presetPanel.setBounds(topBar.removeFromLeft(topBar.getWidth() * 2 / 3));
+#define TOP_BAR_HEIGHT_PROPORTION 0.15
+#define TOP_BAR_SLIDER_PROPORTION 0.25
+#define TOP_BAR_PRESET_PROPORTION 0.5
+
+#define DISTORTION_WIDTH_PROPORTION 0.2
+#define AMP_WIDTH_PROPORTION 0.4
+#define DELAY_WIDTH_PROPORTION 0.15
+
+void PixelDriveAudioProcessorEditor::resized() {
+    const auto container = getLocalBounds();
+    auto bounds = container;
+
+    // Add sliders and preset manager to the topbar
+    auto topBar = bounds.removeFromTop(container.proportionOfHeight(TOP_BAR_HEIGHT_PROPORTION));
+    preGainSlider.setBounds(topBar.removeFromLeft(container.proportionOfWidth(TOP_BAR_SLIDER_PROPORTION)));
+    presetPanel.setBounds(topBar.removeFromLeft(container.proportionOfWidth(TOP_BAR_PRESET_PROPORTION)));
     noiseGateSlider.setBounds(topBar);
 
-    bounds.reduce(bounds.getWidth() / 25, bounds.getHeight() / 25);
+    // Add horizontal padding to the region below the top bar
+    bounds.reduce(container.proportionOfWidth(BOUNDS_WIDTH_PADDING), 0);
 
-    auto distortionBounds = bounds.removeFromLeft(bounds.getWidth() / 4);
-    distortionBounds.setHeight(distortionBounds.getHeight() * 2 / 3);
-    distortionBounds.setY(bounds.getHeight() / 2);
-    processorRef.getDistortionPanel().setBounds(distortionBounds);
+    auto distortionBounds = bounds.removeFromLeft(container.proportionOfWidth(DISTORTION_WIDTH_PROPORTION));
+    // Add vertical padding to distortion module
+    distortionBounds.reduce(0, container.proportionOfHeight(PEDAL_HEIGHT_PADDING_PROPORTION));
+    // Set distortion bounds
+    processorRef.getDistortionPanel().setBounds(distortionBounds.reduced(MODULE_PADDING));
 
-    // Add amp sliders
-    auto ampBounds = bounds.removeFromLeft(bounds.getWidth() * 2 / 3);
-    // Add amp padding
-    ampBounds.removeFromTop(ampBounds.getHeight() / 2);
-    ampBounds.removeFromBottom(ampBounds.getHeight() / 2);
+    auto ampBounds = bounds.removeFromLeft(container.proportionOfWidth(AMP_WIDTH_PROPORTION));
+    // Add vertical padding to amp module
+    ampBounds.reduce(0, container.proportionOfHeight(AMP_HEIGHT_PADDING_PROPORTION));
+    // Set amp module bounds
+    processorRef.getAmpPanel().setBounds(ampBounds.reduced(MODULE_PADDING));
 
-    processorRef.getAmpPanel().setBounds(ampBounds);
+    // Add vertical padding to the reverb and delay modules
+    bounds.reduce(0, container.proportionOfHeight(PEDAL_HEIGHT_PADDING_PROPORTION));
+    // Set delay module bounds
+    auto delayBounds = bounds.removeFromRight(container.proportionOfWidth(DELAY_WIDTH_PROPORTION));
+    processorRef.getDelayPanel().setBounds(delayBounds.reduced(MODULE_PADDING));
 
-    // Reverb and delay padding
-    bounds.removeFromTop(bounds.getHeight() / 50);
-    bounds.removeFromBottom(bounds.getHeight() / 50);
-    auto delayBounds = bounds.removeFromTop(bounds.getHeight() / 3);
-    processorRef.getDelayPanel().setBounds(delayBounds);
-
-    // Add reverb sliders
-    bounds.removeFromBottom(bounds.getHeight() / 20);
-    processorRef.getReverbPanel().setBounds(bounds);
+    // Set reverb module bounds
+    processorRef.getReverbPanel().setBounds(bounds.reduced(MODULE_PADDING));
 }
 
 void PixelDriveAudioProcessorEditor::parameterValueChanged(int parameterIndex, float newValue) {
