@@ -13,7 +13,7 @@ PixelDriveAudioProcessorEditor::PixelDriveAudioProcessorEditor(PixelDriveAudioPr
     : AudioProcessorEditor(&p), processorRef(p),
     preGainSliderAttachment(p.apvts, "preGain", preGainSlider),
     // Distortion attachments
-    distortionPreGainSliderAttachment(p.apvts, "distortionPreGain", p.getDistortionPanel().distortionToneSlider),
+    distortionPreGainSliderAttachment(p.apvts, "distortionPreGain", p.getDistortionPanel().distortionPreGainSlider),
     distortionToneSliderAttachment(p.apvts, "distortionTone", p.getDistortionPanel().distortionToneSlider),
     distortionPostGainSliderAttachment(p.apvts, "distortionPostGain", p.getDistortionPanel().distortionPostGainSlider),
     distortionClaritySliderAttachment(p.apvts, "distortionClarity", p.getDistortionPanel().distortionClaritySlider),
