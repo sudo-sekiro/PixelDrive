@@ -37,7 +37,7 @@ class ReverbUnit {
         newParams.roomSize = chainSettings.reverbRoomSize;
         newParams.width = chainSettings.reverbSpread;
 
-        newParams.freezeMode = chainSettings.reverbShimmer ? 1.f : 0.f;
+        newParams.freezeMode = chainSettings.reverbShimmer ? 0.f : 1.f;
 
         reverb.setParameters(newParams);
     }
