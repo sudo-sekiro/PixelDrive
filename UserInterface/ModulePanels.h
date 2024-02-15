@@ -26,7 +26,7 @@ class DistortionPanel : public Component {
  public:
     CustomRotarySlider distortionPreGainSlider, distortionToneSlider, distortionPostGainSlider,
         distortionClaritySlider;
-    CustomToggleButton distortionBypassButton{"Bypass"};
+    CustomToggleButton distortionBypassButton{"On/Off"};
     DistortionPanel::DistortionPanel() {
         // Distortion labels
         distortionPreGainSlider.addSliderLabels("-10dB", "100dB", "Input Gain");
@@ -100,7 +100,7 @@ class AmpPanel : public Component {
  public:
     // Amp sliders
     CustomRotarySlider ampInputGainSlider, ampLowEndSlider, ampMidsSlider, ampHighEndSlider;
-    CustomToggleButton ampBypassButton{"Bypass"};
+    CustomToggleButton ampBypassButton{"On/Off"};
     AmpPanel::AmpPanel() {
         // Amp labels
         ampInputGainSlider.addSliderLabels("0", "11", "Input Gain");
@@ -162,7 +162,7 @@ class DelayPanel : public Component {
  public:
     // Delay sliders
     CustomRotarySlider delayTimeSlider, delayWetLevelSlider, delayFeedbackSlider;
-    CustomToggleButton delayBypassButton{"Bypass"};
+    CustomToggleButton delayBypassButton{"On/Off"};
     DelayPanel::DelayPanel() {
         // Delay labels
         delayTimeSlider.addSliderLabels("0", ((juce::String)MAX_DELAY_TIME), "Time");
@@ -229,7 +229,7 @@ class ReverbPanel : public Component {
  public:
     // Reverb sliders
     CustomRotarySlider reverbIntensitySlider, reverbRoomSizeSlider, reverbWetMixSlider, reverbSpreadSlider;
-    CustomToggleButton reverbBypassButton{"Bypass"}, reverbShimmerButton{"Shimmer"};
+    CustomToggleButton reverbBypassButton{"On/Off"}, reverbShimmerButton{"Shimmer"};
     ReverbPanel::ReverbPanel() {
         // Reverb labels
         reverbIntensitySlider.addSliderLabels("0", "10", "Intensity");
