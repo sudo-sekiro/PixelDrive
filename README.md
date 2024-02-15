@@ -1,3 +1,20 @@
+# PixelDrive
+
+## Features
+
+![alt text](./Docs/PixelDrive.PNG)
+
+* Distortion using waveshaping algorithm for soft clipping.
+* Three band equaliser.
+* Amplifier simulation using gain and distortion.
+* Convolution based speaker cabinet simulation.
+* Reverb effect using the juce reverb module.
+* Delay effect using a delay line ring buffer.
+* Noise gate using infinite impulse response low pass filter.
+* Preset manager.
+* Multiple gain stages.
+* Support for Asio driver allowing for low latency feedback.
+
 ## Building instructions for Windows
 
 ### Dependencies
