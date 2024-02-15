@@ -105,15 +105,6 @@ void PixelDriveAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBl
     leftChain.prepare(spec);
     rightChain.prepare(spec);
 
-    // Set initial plugin gain
-    auto& leftPreGain = leftChain.template get<ChainPositions::preGainIndex>();
-    auto& rightPreGain = rightChain.template get<ChainPositions::preGainIndex>();
-
-    auto chainSettings = getChainSettings(apvts);
-
-    leftPreGain.setGainDecibels(chainSettings.preGain);
-    rightPreGain.setGainDecibels(chainSettings.preGain);
-
     updateParameters();
 }
 
@@ -203,16 +194,17 @@ juce::AudioProcessorEditor* PixelDriveAudioProcessor::createEditor() {
 
 //==============================================================================
 void PixelDriveAudioProcessor::getStateInformation(juce::MemoryBlock& destData) {
-    // You should use this method to store your parameters in the memory block.
-    // You could do that either as raw data, or use the XML or ValueTree classes
-    // as intermediaries to make it easy to save and load complex data.
-    juce::ignoreUnused(destData);
+    const auto state = apvts.copyState();
+    const auto xml(state.createXml());
+    copyXmlToBinary(*xml, destData);
 }
 
 void PixelDriveAudioProcessor::setStateInformation(const void* data, int sizeInBytes) {
-    // You should use this method to restore your parameters from this memory block,
-    // whose contents will have been created by the getStateInformation() call.
-    juce::ignoreUnused(data, sizeInBytes);
+    const auto xmlState = getXmlFromBinary(data, sizeInBytes);
+    if (xmlState == nullptr)
+        return;
+    const auto newTree = ValueTree::fromXml(*xmlState);
+    apvts.replaceState(newTree);
 }
 
 // Add parameter
@@ -385,7 +377,7 @@ void PixelDriveAudioProcessor::updateParameters() {
 
     leftAmpSim.setParams(chainSettings, getSampleRate());
     rightAmpSim.setParams(chainSettings, getSampleRate());
-    // // Bypass amp sim
+    // Bypass amp sim
     leftChain.setBypassed<ChainPositions::ampSimIndex> (chainSettings.ampBypass);
     rightChain.setBypassed<ChainPositions::ampSimIndex> (chainSettings.ampBypass);
 
