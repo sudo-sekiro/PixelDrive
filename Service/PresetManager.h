@@ -18,7 +18,10 @@ class PresetManager : juce::ValueTree::Listener {
     void loadPreset(const juce::String& presetName);
     int loadNextPreset();
     int loadPreviousPreset();
+    juce::StringArray getFactoryPresets() const;
+    juce::StringArray getUserPresets() const;
     juce::StringArray getAllPresets() const;
+    int getNumFactoryPresets() const;
     juce::String getCurrentPreset() const;
 
  private:
