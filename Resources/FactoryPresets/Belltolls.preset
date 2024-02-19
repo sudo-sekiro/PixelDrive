@@ -23,4 +23,5 @@
   <PARAM id="reverbShimmer" value="1.0"/>
   <PARAM id="reverbSpread" value="1.0"/>
   <PARAM id="reverbWetMix" value="0.6000000238418579"/>
+  <PARAM id="outputGain" value="0.0"/>
 </PixelDrive>
