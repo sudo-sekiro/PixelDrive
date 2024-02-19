@@ -4,6 +4,8 @@
 
 #include <memory>
 
+#define BUTTON_COLOUR_HEX 0xFF525174
+
 namespace UserInterface {
 // UI component for choosing and creating user presets
 class PresetPanel : public Component, Button::Listener, ComboBox::Listener {
@@ -16,6 +18,7 @@ class PresetPanel : public Component, Button::Listener, ComboBox::Listener {
 
         presetList.setTextWhenNothingSelected("No Preset Selected");
         presetList.setMouseCursor(MouseCursor::PointingHandCursor);
+        presetList.setColour(juce::ComboBox::ColourIds::backgroundColourId, juce::Colour(BUTTON_COLOUR_HEX));
         addAndMakeVisible(presetList);
         presetList.addListener(this);
         loadPresetList();
@@ -81,14 +84,31 @@ class PresetPanel : public Component, Button::Listener, ComboBox::Listener {
         button.setMouseCursor(MouseCursor::PointingHandCursor);
         addAndMakeVisible(button);
         button.addListener(this);
+        button.setColour(juce::TextButton::buttonColourId, juce::Colour(BUTTON_COLOUR_HEX));
     }
 
     // Update combo box options with most recent set of presets
     void loadPresetList() {
         presetList.clear(dontSendNotification);
         const auto allPresets = presetManager.getAllPresets();
+        const auto factoryPresets = presetManager.getFactoryPresets();
+        const auto userPresets = presetManager.getUserPresets();
         const auto currentPreset = presetManager.getCurrentPreset();
-        presetList.addItemList(allPresets, 1);
+
+        int itemID = 1;
+
+        PopupMenu factoryPresetMenu;
+        for (auto item : factoryPresets) {
+            factoryPresetMenu.addItem(itemID++, item, true, false);
+        }
+        presetList.getRootMenu()->addSubMenu("Factory Presets", factoryPresetMenu);
+
+        PopupMenu userPresetMenu;
+        for (auto item : userPresets) {
+            userPresetMenu.addItem(itemID++, item, true, false);
+        }
+        presetList.getRootMenu()->addSubMenu("User Presets", userPresetMenu);
+
         presetList.setSelectedItemIndex(allPresets.indexOf(currentPreset), dontSendNotification);
     }
 
