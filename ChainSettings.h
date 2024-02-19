@@ -12,7 +12,7 @@ struct ChainSettings {
     bool delayBypass {false};
     float reverbIntensity {0.5f}, reverbWetMix {0.33f}, reverbRoomSize {0.5f}, reverbSpread {1.f};
     bool reverbShimmer {false}, reverbBypass {false};
-    float noiseGate {0.f};
+    float noiseGate {0.f}, outputGain {0.f};
 };
 
 ChainSettings getChainSettings(juce::AudioProcessorValueTreeState& apvts);

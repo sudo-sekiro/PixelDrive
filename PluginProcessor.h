@@ -84,13 +84,19 @@ class PixelDriveAudioProcessor  : public juce::AudioProcessor {
         ampSimIndex,
         delayIndex,
         reverbIndex,
-        noiseGateIndex
+        noiseGateIndex,
+        outputGainIndex
     };
 
     using FilterCoefs = juce::dsp::IIR::Coefficients<float>;
 
-    using MonoChain = juce::dsp::ProcessorChain<juce::dsp::Gain<float>, Distortion<float>, AmpSimulator<float>,
-                                                Delay<float, 1>, ReverbUnit<float>, FilterChain>;
+    using MonoChain = juce::dsp::ProcessorChain<juce::dsp::Gain<float>,
+                                                Distortion<float>,
+                                                AmpSimulator<float>,
+                                                Delay<float, 1>,
+                                                ReverbUnit<float>,
+                                                FilterChain,
+                                                juce::dsp::Gain<float>>;
 
     MonoChain leftChain, rightChain;
 

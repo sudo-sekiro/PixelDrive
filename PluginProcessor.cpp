@@ -242,6 +242,7 @@ ChainSettings getChainSettings(juce::AudioProcessorValueTreeState& apvts) {
     settings.reverbBypass = apvts.getRawParameterValue("reverbBypass")->load();
 
     settings.noiseGate = apvts.getRawParameterValue("noiseGate")->load();
+    settings.outputGain = apvts.getRawParameterValue("outputGain")->load();
 
     return settings;
 }
@@ -339,6 +340,9 @@ juce::AudioProcessorValueTreeState::ParameterLayout
         layout.add(std::make_unique<juce::AudioParameterFloat>("noiseGate", "noiseGate",
                                     juce::NormalisableRange<float>(100.f, 20000.f, 0.5f, 1.f),
                                     17500.0f));
+        layout.add(std::make_unique<juce::AudioParameterFloat>("outputGain", "outputGain",
+                                                               juce::NormalisableRange<float>(-24.f, 24.f, 0.5f, 1.f),
+                                                               0.0f));
 
 
         return layout;
@@ -404,6 +408,12 @@ void PixelDriveAudioProcessor::updateParameters() {
 
     updateNoiseGate(leftNoiseGate, chainSettings.noiseGate, getSampleRate());
     updateNoiseGate(rightNoiseGate, chainSettings.noiseGate, getSampleRate());
+
+    auto& leftOutputGain = leftChain.template get<ChainPositions::outputGainIndex>();
+    auto& rightOutputGain = rightChain.template get<ChainPositions::outputGainIndex>();
+
+    leftOutputGain.setGainDecibels(chainSettings.outputGain);
+    rightOutputGain.setGainDecibels(chainSettings.outputGain);
 }
 
 //==============================================================================
