@@ -38,6 +38,7 @@ PixelDriveAudioProcessorEditor::PixelDriveAudioProcessorEditor(PixelDriveAudioPr
     reverbShimmerButtonAttachment(p.apvts, "reverbShimmer", p.getReverbPanel().reverbShimmerButton),
     // Noise gate attachment
     noiseGateSliderAttachment(p.apvts, "noiseGate", noiseGateSlider),
+    outputGainSliderAttachment(p.apvts, "outputGain", outputGainSlider),
     // Preset panel
     presetPanel(p.getPresetManager()) {
     // Make sure that before the constructor has finished, you've set the
@@ -86,8 +87,9 @@ void PixelDriveAudioProcessorEditor::paint(juce::Graphics& g) {
 #define AMP_HEIGHT_PADDING_PROPORTION 0.1
 
 #define TOP_BAR_HEIGHT_PROPORTION 0.15
-#define TOP_BAR_SLIDER_PROPORTION 0.25
+#define TOP_BAR_PREGAIN_PROPORTION 0.25
 #define TOP_BAR_PRESET_PROPORTION 0.5
+#define TOP_BAR_NOISEGATE_PROPORTION 0.125
 
 #define DISTORTION_WIDTH_PROPORTION 0.2
 #define AMP_WIDTH_PROPORTION 0.4
@@ -99,9 +101,10 @@ void PixelDriveAudioProcessorEditor::resized() {
 
     // Add sliders and preset manager to the topbar
     auto topBar = bounds.removeFromTop(container.proportionOfHeight(TOP_BAR_HEIGHT_PROPORTION));
-    preGainSlider.setBounds(topBar.removeFromLeft(container.proportionOfWidth(TOP_BAR_SLIDER_PROPORTION)));
+    preGainSlider.setBounds(topBar.removeFromLeft(container.proportionOfWidth(TOP_BAR_PREGAIN_PROPORTION)));
     presetPanel.setBounds(topBar.removeFromLeft(container.proportionOfWidth(TOP_BAR_PRESET_PROPORTION)));
-    noiseGateSlider.setBounds(topBar);
+    noiseGateSlider.setBounds(topBar.removeFromLeft(container.proportionOfWidth(TOP_BAR_NOISEGATE_PROPORTION)));
+    outputGainSlider.setBounds(topBar);
 
     // Add horizontal padding to the region below the top bar
     bounds.reduce(container.proportionOfWidth(BOUNDS_WIDTH_PADDING), 0);
@@ -142,7 +145,8 @@ void PixelDriveAudioProcessorEditor::timerCallback() {
 std::vector<juce::Component*> PixelDriveAudioProcessorEditor::getComps() {
     return {
         &preGainSlider,
-        &noiseGateSlider
+        &noiseGateSlider,
+        &outputGainSlider
     };
 }
 
@@ -153,4 +157,6 @@ void PixelDriveAudioProcessorEditor::addLabels() {
 
     // Noise Gate
     noiseGateSlider.addSliderLabels("100", "20000", "Noise Gate");
+    // Output Gain
+    outputGainSlider.addSliderLabels("-24dB", "24dB", "Output Gain");
 }

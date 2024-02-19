@@ -38,7 +38,7 @@ class PixelDriveAudioProcessorEditor  : public juce::AudioProcessorEditor,
     CustomRotarySlider preGainSlider;
 
     // Noise gate slider
-    CustomRotarySlider noiseGateSlider;
+    CustomRotarySlider noiseGateSlider, outputGainSlider;
 
     std::vector<juce::Component*> getComps();
 
@@ -55,7 +55,8 @@ class PixelDriveAudioProcessorEditor  : public juce::AudioProcessorEditor,
                delayTimeSliderAttachment, delayWetLevelSliderAttachment, delayFeedbackSliderAttachment,
                reverbIntensitySliderAttachment, reverbRoomSizeSliderAttachment, reverbWetMixSliderAttachment,
                reverbSpreadSliderAttachment,
-               noiseGateSliderAttachment;
+               noiseGateSliderAttachment,
+               outputGainSliderAttachment;
 
     ButtonAttachment distortionBypassButtonAttachment, ampBypassButtonAttachment, delayBypassButtonAttachment,
                      reverbBypassButtonAttachment, reverbShimmerButtonAttachment;
