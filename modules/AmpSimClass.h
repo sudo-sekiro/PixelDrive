@@ -112,7 +112,7 @@ class AmpSimulator {
         #define LOWCUTFREQMAX 1500.f
         #define HIGHCUTBASEFREQ 4000.f
         #define HIGHCUTMAXFREQ 20000.f
-        #define MAXMIDGAIN 24.f
+        #define MAXMIDGAIN 0.f
         #define MINMIDGAIN -24.f
 
         // Set lowpass cutoff frequency
