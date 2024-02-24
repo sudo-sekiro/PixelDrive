@@ -68,21 +68,13 @@ class AmpSimulator {
     //==============================================================================
     void prepare(const juce::dsp::ProcessSpec& spec) {
         ampProcessorChain.prepare(spec);
-        auto lowCutCoeffs = ampProcessorChain.get<AmpChainPositions::LowCutIndex>().coefficients;
-        *lowCutCoeffs = *FilterCoefs::makeFirstOrderHighPass(spec.sampleRate, 1.0f);
-
-        auto highCutCoeffs = ampProcessorChain.get<AmpChainPositions::HighCutIndex>().coefficients;
-        *highCutCoeffs = *FilterCoefs::makeFirstOrderLowPass(spec.sampleRate, 20000.0f);
-
-        updatePeakFilter(spec.sampleRate,
-                         ampProcessorChain.get<AmpChainPositions::MidFilterIndex>().coefficients,
-                         12.f);
 
         ampProcessorChain.get<AmpChainPositions::inputGainIndex>().setGainDecibels(1.f);
 
-        ampProcessorChain.setBypassed<AmpChainPositions::LowCutIndex>(false);
-        ampProcessorChain.setBypassed<AmpChainPositions::HighCutIndex>(false);
-        ampProcessorChain.setBypassed<AmpChainPositions::MidFilterIndex>(false);
+        ampProcessorChain.setBypassed<AmpChainPositions::lowCutIndex>(false);
+        ampProcessorChain.setBypassed<AmpChainPositions::midFilterIndex>(false);
+        ampProcessorChain.setBypassed<AmpChainPositions::highShelfIndex>(false);
+        ampProcessorChain.setBypassed<AmpChainPositions::lowShelfIndex>(false);
 
         auto& waveShaper = ampProcessorChain.template get<waveShaperIndex>();
 
@@ -104,38 +96,80 @@ class AmpSimulator {
 
 
     //==============================================================================
+    // Set gain, low cut, high shelf, low shelf and peak filter parameters
     void setParams(ChainSettings chainSettings, double sampleRate) {
-        // Set gain, low pass, highpass and peak freq, update any convolution changes for cab sim
-        #define INPUTRANGEMIN 0.f
-        #define INPUTRANGEMAX 10.f
-        #define LOWCUTFREQMIN 1.f
-        #define LOWCUTFREQMAX 1500.f
-        #define HIGHCUTBASEFREQ 4000.f
-        #define HIGHCUTMAXFREQ 20000.f
-        #define MAXMIDGAIN 0.f
-        #define MINMIDGAIN -24.f
+        #define INPUT_RANGE_MIN 0.f
+        #define INPUT_RANGE_MAX 10.f
 
-        // Set lowpass cutoff frequency
+        #define LOWCUT_FREQ_MIN 1.f
+        #define LOWCUT_FREQ_MAX 65.f
+
+        #define MID_GAIN_MAX -9.f
+        #define MID_GAIN_MIN -20.f
+
+        #define SHELF_FILTER_CUTOFF_FREQUENCY 1000.f
+        #define SHELF_FILTER_Q_VALUE 0.7f
+
+        #define HIGH_SHELF_GAIN_FACTOR_MIN 0.1f
+        #define HIGH_SHELF_GAIN_FACTOR_MAX 1.f
+
+        #define LOW_SHELF_GAIN_DENOMINATOR_MIN 1.f
+        #define LOW_SHELF_GAIN_DENOMINATOR_MAX 10.f
+        #define LOW_SHELF_GAIN_FACTOR_BASE 0.9f
+        #define LOW_SHELF_GAIN_NUMERATOR_MIN 0.9f
+        #define LOW_SHELF_GAIN_NUMERATOR_MAX 1.f
+
+        /* Set lowpass cutoff frequency.
+         * This will increase as the bass input decreases to add a slope to the low end response as bass is decreased. */
         auto lowCutFreq = juce::jmap(chainSettings.ampLowEnd,
-                                     INPUTRANGEMIN,
-                                     INPUTRANGEMAX,
-                                     LOWCUTFREQMAX,
-                                     LOWCUTFREQMIN);
-        auto lowCutCoeffs = ampProcessorChain.get<AmpChainPositions::LowCutIndex>().coefficients;
+                                     INPUT_RANGE_MIN,
+                                     INPUT_RANGE_MAX,
+                                     LOWCUT_FREQ_MAX,
+                                     LOWCUT_FREQ_MIN);
+        auto lowCutCoeffs = ampProcessorChain.get<AmpChainPositions::lowCutIndex>().coefficients;
         *lowCutCoeffs = *FilterCoefs::makeFirstOrderHighPass(sampleRate, lowCutFreq);
 
-        // Set highpass cutoff frequency
-        auto highCutFreq =  juce::jmap(chainSettings.ampHighEnd,
-                                       INPUTRANGEMIN,
-                                       INPUTRANGEMAX,
-                                       HIGHCUTBASEFREQ,
-                                       HIGHCUTMAXFREQ);
-        auto highCutCoeffs = ampProcessorChain.get<AmpChainPositions::HighCutIndex>().coefficients;
-        *highCutCoeffs = *FilterCoefs::makeFirstOrderLowPass(sampleRate, highCutFreq);
+        /* Set high shelf gain.
+         * This value is mapped from 0.1 to 1 so that the gain of the high shelf filter varies with the treble input.
+         * When the gain factor is 1 there is 0 dB attenuatiion and when it is 0.1 there is 10 dB attenuation on the
+         * high end frequency band */
+        auto highShelfGain =  juce::jmap(chainSettings.ampHighEnd,
+                                       INPUT_RANGE_MIN,
+                                       INPUT_RANGE_MAX,
+                                       HIGH_SHELF_GAIN_FACTOR_MIN,
+                                       HIGH_SHELF_GAIN_FACTOR_MAX);
+        auto highShelfCoeffs = ampProcessorChain.get<AmpChainPositions::highShelfIndex>().coefficients;
+        *highShelfCoeffs = *FilterCoefs::makeHighShelf(sampleRate,
+                                                       SHELF_FILTER_CUTOFF_FREQUENCY,
+                                                       SHELF_FILTER_Q_VALUE,
+                                                       highShelfGain);
+        /* Divide low shelf gain proportional to the bass input.
+         * This attenuates the mid and low range frequncy bands as the bass input is lowered. */
+        auto lowShelfGainDenominator = juce::jmap(chainSettings.ampLowEnd,
+                                                  INPUT_RANGE_MIN,
+                                                  INPUT_RANGE_MAX,
+                                                  LOW_SHELF_GAIN_DENOMINATOR_MAX,
+                                                  LOW_SHELF_GAIN_DENOMINATOR_MIN);
 
-        // Set gain of the peak filter between -24 and 24 dbs
-        auto midGain = juce::jmap(chainSettings.ampMids, INPUTRANGEMIN, INPUTRANGEMAX, MINMIDGAIN, MAXMIDGAIN);
-        updatePeakFilter(sampleRate, ampProcessorChain.get<AmpChainPositions::MidFilterIndex>().coefficients, midGain);
+        /* When the trebble knob is high, attenuate the low end.
+         * This will mimic hardware tone stacks where the low end is boosted when the high end potentiomter is lowered. */
+        auto lowShelfGainNumerator = juce::jmap(chainSettings.ampHighEnd,
+                                                INPUT_RANGE_MIN,
+                                                INPUT_RANGE_MAX,
+                                                LOW_SHELF_GAIN_NUMERATOR_MAX,
+                                                LOW_SHELF_GAIN_NUMERATOR_MIN);
+
+        auto lowShelfCoeffs = ampProcessorChain.get<AmpChainPositions::lowShelfIndex>().coefficients;
+        *lowShelfCoeffs = *FilterCoefs::makeLowShelf(sampleRate,
+                                                     SHELF_FILTER_CUTOFF_FREQUENCY,
+                                                     SHELF_FILTER_Q_VALUE,
+                                                     lowShelfGainNumerator / lowShelfGainDenominator);
+
+        /* Set gain of the peak filter between -9 and -20 dbs.
+         * Guitar pickups naturally boost the mid frequencies so the midband should always be attenuated to balance the
+         * frequencies. */
+        auto midGain = juce::jmap(chainSettings.ampMids, INPUT_RANGE_MIN, INPUT_RANGE_MAX, MID_GAIN_MIN, MID_GAIN_MAX);
+        updatePeakFilter(sampleRate, ampProcessorChain.get<AmpChainPositions::midFilterIndex>().coefficients, midGain);
 
         // Set input Gain
         ampProcessorChain.get<AmpChainPositions::inputGainIndex>().setGainDecibels(chainSettings.ampInputGain);
@@ -150,17 +184,19 @@ class AmpSimulator {
     //==============================================================================
     enum AmpChainPositions {
         inputGainIndex,
-        LowCutIndex,
-        MidFilterIndex,
-        HighCutIndex,
+        lowCutIndex,
+        midFilterIndex,
+        highShelfIndex,
+        lowShelfIndex,
         waveShaperIndex,
-        CabSimIndex
+        cabSimIndex
     };
 
     using Filter = juce::dsp::IIR::Filter<Type>;
     using FilterCoefs = juce::dsp::IIR::Coefficients<Type>;
 
     juce::dsp::ProcessorChain<juce::dsp::Gain<Type>,
+                              Filter,
                               Filter,
                               Filter,
                               Filter,
