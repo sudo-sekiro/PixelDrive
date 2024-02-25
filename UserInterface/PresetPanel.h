@@ -85,6 +85,7 @@ class PresetPanel : public Component, Button::Listener, ComboBox::Listener {
         addAndMakeVisible(button);
         button.addListener(this);
         button.setColour(juce::TextButton::buttonColourId, juce::Colour(BUTTON_COLOUR_HEX));
+        button.setConnectedEdges(juce::TextButton::ConnectedOnLeft | juce::TextButton::ConnectedOnRight);
     }
 
     // Update combo box options with most recent set of presets
