@@ -159,7 +159,7 @@ namespace Service {
     StringArray PresetManager::getFactoryPresets() const {
         StringArray presets;
         // Needs to match names of presets in Resources/FactoryPresets (without .preset suffix)
-        auto factory = {"Belltolls", "Thrash"};
+        auto factory = {"Belltolls", "Clean", "EightiesLead", "FlyingWhales", "Thrash", "UnderTheBridge"};
         for (const auto& preset : factory) {
             presets.add(preset);
         }

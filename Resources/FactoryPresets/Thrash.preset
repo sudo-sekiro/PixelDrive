@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<PixelDrive presetName="factoryThrash" version="1">
+<PixelDrive presetName="Thrash" version="1">
   <PARAM id="ampBypass" value="0.0"/>
-  <PARAM id="ampHighEnd" value="10.0"/>
+  <PARAM id="ampHighEnd" value="7.099999904632568"/>
   <PARAM id="ampInputGain" value="33.40000152587891"/>
-  <PARAM id="ampLowEnd" value="10.0"/>
-  <PARAM id="ampMids" value="2.900000095367432"/>
+  <PARAM id="ampLowEnd" value="6.800000190734863"/>
+  <PARAM id="ampMids" value="3.700000047683716"/>
   <PARAM id="delayBypass" value="1.0"/>
   <PARAM id="delayFeedback" value="0.1000000014901161"/>
   <PARAM id="delayTime" value="0.2000000029802322"/>
@@ -15,8 +15,8 @@
   <PARAM id="distortionPostGain" value="-7.0"/>
   <PARAM id="distortionPreGain" value="56.5"/>
   <PARAM id="distortionTone" value="1.009999990463257"/>
-  <PARAM id="noiseGate" value="17500.0"/>
-  <PARAM id="preGain" value="-0.5"/>
+  <PARAM id="noiseGate" value="20000.0"/>
+  <PARAM id="preGain" value="8.5"/>
   <PARAM id="reverbBypass" value="1.0"/>
   <PARAM id="reverbIntensity" value="0.5"/>
   <PARAM id="reverbRoomSize" value="0.5"/>

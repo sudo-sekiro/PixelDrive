@@ -100,18 +100,22 @@ target_compile_definitions(PixelDrivePlugin
 
 # Binary assets to include
 juce_add_binary_data(PixelDrivePluginData SOURCES
-    Resources/thrash_amp.wav
-    Resources/distortion.png
-    Resources/amp.png
-    Resources/reverb.png
-    Resources/delay.png
-    Resources/knob.png
-    Resources/toggle_button_on.png
-    Resources/toggle_button_off.png
-    Resources/toggle_on_down.png
-    Resources/toggle_off_down.png
-    Resources/FactoryPresets/Thrash.preset
-    Resources/FactoryPresets/Belltolls.preset)
+    "Resources/thrash_amp.wav"
+    "Resources/distortion.png"
+    "Resources/amp.png"
+    "Resources/reverb.png"
+    "Resources/delay.png"
+    "Resources/knob.png"
+    "Resources/toggle_button_on.png"
+    "Resources/toggle_button_off.png"
+    "Resources/toggle_on_down.png"
+    "Resources/toggle_off_down.png"
+    "Resources/FactoryPresets/Thrash.preset"
+    "Resources/FactoryPresets/Belltolls.preset"
+    "Resources/FactoryPresets/EightiesLead.preset"
+    "Resources/FactoryPresets/Clean.preset"
+    "Resources/FactoryPresets/FlyingWhales.preset"
+    "Resources/FactoryPresets/UnderTheBridge.preset")
 
 # `target_link_libraries` links libraries and JUCE modules to other libraries or executables. Here,
 # we're linking our executable target to the `juce::juce_audio_utils` module. Inter-module

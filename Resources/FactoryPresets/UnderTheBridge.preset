@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<PixelDrive presetName="UnderTheBridge" version="1">
+  <PARAM id="ampBypass" value="0.0"/>
+  <PARAM id="ampHighEnd" value="5.800000190734863"/>
+  <PARAM id="ampInputGain" value="51.79999923706055"/>
+  <PARAM id="ampLowEnd" value="5.900000095367432"/>
+  <PARAM id="ampMids" value="5.0"/>
+  <PARAM id="delayBypass" value="0.0"/>
+  <PARAM id="delayFeedback" value="0.4000000059604645"/>
+  <PARAM id="delayTime" value="0.6000000238418579"/>
+  <PARAM id="delayWetLevel" value="0.4000000059604645"/>
+  <PARAM id="distortionBypass" value="1.0"/>
+  <PARAM id="distortionClarity" value="1000.0"/>
+  <PARAM id="distortionPostGain" value="-1.0"/>
+  <PARAM id="distortionPreGain" value="42.0"/>
+  <PARAM id="distortionTone" value="5.010000228881836"/>
+  <PARAM id="noiseGate" value="13042.0"/>
+  <PARAM id="preGain" value="2.5"/>
+  <PARAM id="reverbBypass" value="0.0"/>
+  <PARAM id="reverbIntensity" value="0.300000011920929"/>
+  <PARAM id="reverbRoomSize" value="0.5"/>
+  <PARAM id="reverbShimmer" value="1.0"/>
+  <PARAM id="reverbSpread" value="1.0"/>
+  <PARAM id="reverbWetMix" value="0.4000000059604645"/>
+  <PARAM id="outputGain" value="0.0"/>
+</PixelDrive>
